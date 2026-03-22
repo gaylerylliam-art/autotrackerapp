@@ -676,6 +676,294 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   border: 1px solid rgba(79,110,247,0.4); color: var(--accent2); margin-top: 6px;
 }
 
+/* =================== HIGH-FIDELITY ONBOARDING =================== */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.intro-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  background: radial-gradient(circle at top right, rgba(124,77,255,0.15), transparent 70%);
+}
+
+.intro-slide.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.intro-slide.prev {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.intro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.intro-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.intro-logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 16px rgba(124,77,255,0.3);
+}
+
+.intro-visual {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.intro-main-icon {
+  font-size: 120px;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+  z-index: 2;
+}
+
+.intro-badge {
+  position: absolute;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.intro-content {
+  margin-top: auto;
+  padding-bottom: 40px;
+}
+
+.intro-tag {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.intro-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--accent2);
+  border-radius: 50%;
+}
+
+.intro-title {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.intro-title span {
+  color: var(--accent2);
+}
+
+.intro-desc {
+  font-size: 16px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.intro-btn {
+  width: 100%;
+  padding: 18px;
+  border-radius: 100px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(124,77,255,0.4);
+  transition: all 0.18s;
+}
+
+.intro-btn:active {
+  transform: scale(0.98);
+}
+
+.skip-btn {
+  background: rgba(255,255,255,0.08);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+}
+
+/* =================== REGISTRATION WIZARD =================== */
+.wizard-step {
+  padding: 24px;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(124,77,255,0.1), transparent 50%);
+}
+
+.wizard-step.active {
+  display: flex;
+}
+
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  position: relative;
+  padding: 0 20px;
+}
+
+.wizard-progress::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  right: 40px;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.prog-dot-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.prog-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text3);
+  transition: all 0.3s;
+}
+
+.prog-dot-wrap.active .prog-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.prog-dot-wrap.done .prog-dot {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.prog-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.type-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-card.active {
+  border-color: var(--accent);
+  background: rgba(124,77,255,0.05);
+  box-shadow: 0 8px 24px rgba(124,77,255,0.1);
+}
+
+.type-icon {
+  font-size: 32px;
+}
+
+.type-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
 /* EMPTY STATE */
 .empty { text-align: center; padding: 40px 30px; }
 .empty-icon { font-size: 48px; margin-bottom: 12px; }
@@ -1046,23 +1334,236 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   <!-- Home Screen -->
     <div id="screen-home" class="screen active">
       <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
-        <div class="onboarding-card card">
-          <div class="onboarding-header">
-            <div class="onboarding-icon"><i class="fas fa-rocket"></i></div>
-            <h3>Welcome to AutoTrack</h3>
-            <p>Let's get your vehicle profile set up in seconds.</p>
-          </div>
-          <div class="onboarding-steps">
-            <div class="onboarding-step active" onclick="showScreen('vehicles')">
-              <div class="step-num">1</div>
-              <div class="step-text">Add your first vehicle</div>
+        <!-- Slide 1: Welcome -->
+        <div class="intro-slide active" id="intro-1">
+          <div class="intro-header">
+            <div class="intro-logo">
+              <div class="intro-logo-icon">🚗</div>
+              AutoTrack
             </div>
-            <div class="onboarding-step" onclick="openAddExpense()">
-              <div class="step-num">2</div>
-              <div class="step-text">Record your first expense</div>
+            <div class="skip-btn" onclick="closeOnboarding()">Skip</div>
+          </div>
+          <div class="intro-visual">
+            <div class="intro-badge" style="top:20px; right:20px; animation-delay: 0s;">📊 Smart Reports</div>
+            <div class="intro-badge" style="top:100px; left:0px; animation-delay: 1s;">🔔 Oil due soon</div>
+            <div class="intro-main-icon">🚗</div>
+            <div class="intro-badge" style="bottom:60px; left:20px; animation-delay: 2s;">⛽ AED 2.8k this month</div>
+          </div>
+          <div class="intro-content">
+            <div class="intro-tag">Welcome to AutoTrack</div>
+            <h1 class="intro-title">Your car's <span>financial brain</span></h1>
+            <p class="intro-desc">Track every dirham spent on your vehicles. Smart insights. Zero effort.</p>
+            <button class="intro-btn" onclick="nextIntro(2)">Get Started <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Slide 2: AI OCR -->
+        <div class="intro-slide" id="intro-2">
+          <div class="intro-header">
+            <div class="intro-logo">
+              <div class="intro-logo-icon">🚗</div>
+              AutoTrack
+            </div>
+            <div class="skip-btn" onclick="closeOnboarding()">Skip</div>
+          </div>
+          <div class="intro-visual">
+            <div class="intro-badge" style="top:50px; right:40px; animation-delay: 0.5s;">✨ AI OCR</div>
+            <div class="intro-main-icon">🧾</div>
+            <div class="intro-badge" style="bottom:80px; left:40px; animation-delay: 1.5s;">⚡ 3 sec to log</div>
+          </div>
+          <div class="intro-content">
+            <div class="intro-tag">Effortless Logging</div>
+            <h1 class="intro-title">Scan receipts, <span>done instantly</span></h1>
+            <p class="intro-desc">Point your camera at any receipt — AI extracts the supplier, amount, date and VAT automatically.</p>
+            <button class="intro-btn" onclick="nextIntro(3)">Next <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            <div style="text-align:center; margin-top:16px;" class="skip-btn" onclick="closeOnboarding()">Skip intro</div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Maintenance -->
+        <div class="intro-slide" id="intro-3">
+          <div class="intro-header">
+            <div class="intro-logo">
+              <div class="intro-logo-icon">🚗</div>
+              AutoTrack
+            </div>
+            <div class="skip-btn" onclick="closeOnboarding()">Skip</div>
+          </div>
+          <div class="intro-visual">
+            <div class="intro-badge" style="top:60px; right:10px; animation-delay: 0.2s;">🗓️ Insurance: 18 days</div>
+            <div class="intro-main-icon">🔧</div>
+            <div class="intro-badge" style="bottom:100px; left:0px; animation-delay: 1.2s;">🛞 Tyre rotation due</div>
+          </div>
+          <div class="intro-content">
+            <div class="intro-tag">Never miss a service</div>
+            <h1 class="intro-title">Smart <span>maintenance alerts</span></h1>
+            <p class="intro-desc">AutoTrack tracks oil changes, tyre rotations, insurance renewals and reminders before they're due.</p>
+            <button class="intro-btn" onclick="nextIntro(4)">Next <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            <div style="text-align:center; margin-top:16px;" class="skip-btn" onclick="closeOnboarding()">Skip intro</div>
+          </div>
+        </div>
+
+        <!-- Slide 4: Reports -->
+        <div class="intro-slide" id="intro-4">
+          <div class="intro-header">
+            <div class="intro-logo">
+              <div class="intro-logo-icon">🚗</div>
+              AutoTrack
+            </div>
+            <div class="skip-btn" onclick="closeOnboarding()">Skip</div>
+          </div>
+          <div class="intro-visual">
+            <div class="intro-badge" style="top:40px; right:20px; animation-delay: 0.8s;">💡 AI insights</div>
+            <div class="intro-main-icon">📊</div>
+            <div class="intro-badge" style="bottom:70px; left:10px; animation-delay: 1.8s;">📈 Cost per km: AED 0.94</div>
+          </div>
+          <div class="intro-content">
+            <div class="intro-tag">Understand your costs</div>
+            <h1 class="intro-title">Reports that <span>actually help</span></h1>
+            <p class="intro-desc">Monthly trends, cost per km, category breakdowns, and AI-powered insights to help you spend smarter.</p>
+            <button class="intro-btn" onclick="startWizard()">Set Up My Vehicle <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            <div style="text-align:center; margin-top:16px;" class="skip-btn" onclick="closeOnboarding()">Skip intro</div>
+          </div>
+        </div>
+
+        <!-- Vehicle Registration Wizard -->
+        <div id="wizard-container" style="display:none; width:100%; height:100%;">
+          <!-- Wizard Navigation Header -->
+          <div class="intro-header" style="padding: 24px 24px 0;">
+            <div class="intro-logo" style="font-size:20px;">
+              <div class="intro-logo-icon" style="width:32px; height:32px; font-size:16px;">🚗</div>
+              AutoTrack
+            </div>
+            <div class="skip-btn" onclick="closeOnboarding()">Add later</div>
+          </div>
+
+          <div class="wizard-progress">
+             <div class="prog-dot-wrap active" id="prog-1">
+               <div class="prog-dot">1</div>
+               <div class="prog-label">Add Vehicle</div>
+             </div>
+             <div class="prog-dot-wrap" id="prog-2">
+               <div class="prog-dot">2</div>
+               <div class="prog-label">Add Expense</div>
+             </div>
+             <div class="prog-dot-wrap" id="prog-3">
+               <div class="prog-dot">✨</div>
+               <div class="prog-label">All Set!</div>
+             </div>
+          </div>
+
+          <!-- Step 1: Vehicle Type -->
+          <div class="wizard-step active" id="wizard-1">
+            <h1 class="intro-title" style="font-size:32px; margin-bottom:8px;">Add your vehicle</h1>
+            <p class="intro-desc" style="font-size:14px; margin-bottom:24px;">Tell us about the car you want to track.</p>
+            
+            <div class="type-grid">
+              <div class="type-card active" onclick="selectType('car', this)">
+                <div class="type-icon">🚗</div>
+                <div class="type-label">Car</div>
+              </div>
+              <div class="type-card" onclick="selectType('suv', this)">
+                <div class="type-icon">🚙</div>
+                <div class="type-label">SUV</div>
+              </div>
+              <div class="type-card" onclick="selectType('van', this)">
+                <div class="type-icon">🚚</div>
+                <div class="type-label">Van</div>
+              </div>
+              <div class="type-card" onclick="selectType('truck', this)">
+                <div class="type-icon">🚛</div>
+                <div class="type-label">Truck</div>
+              </div>
+              <div class="type-card" onclick="selectType('bus', this)">
+                <div class="type-icon">🚌</div>
+                <div class="type-label">Bus</div>
+              </div>
+              <div class="type-card" onclick="selectType('moto', this)">
+                <div class="type-icon">🏍️</div>
+                <div class="type-label">Motor</div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label class="intro-tag" style="margin-bottom:8px;">Make & Model</label>
+                <input type="text" id="wiz-model" placeholder="e.g. BMW X5" class="form-input" style="width:100%; background:var(--card);">
+              </div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div>
+                  <label class="intro-tag" style="margin-bottom:8px;">Year</label>
+                  <input type="number" id="wiz-year" placeholder="2022" class="form-input" style="width:100%; background:var(--card);">
+                </div>
+                <div>
+                  <label class="intro-tag" style="margin-bottom:8px;">Fuel Type</label>
+                  <select id="wiz-fuel" class="form-input" style="width:100%; background:var(--card);">
+                    <option>⛽ Petrol</option>
+                    <option>⛽ Diesel</option>
+                    <option>🔋 Electric</option>
+                    <option>🔌 Hybrid</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="intro-tag" style="margin-bottom:8px;">Plate Number</label>
+                <input type="text" id="wiz-plate" placeholder="E.G. DXB·A1234" class="form-input" style="width:100%; background:var(--card);">
+              </div>
+              <div>
+                <label class="intro-tag" style="margin-bottom:8px;">Starting Odometer (km)</label>
+                <input type="number" id="wiz-odo" placeholder="45000" class="form-input" style="width:100%; background:var(--card);">
+              </div>
+            </div>
+
+            <div style="margin-top:auto; padding-bottom:24px;">
+              <button class="intro-btn" onclick="goToWizardStep(2)">Continue <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <div style="text-align:center; margin-top:16px;" class="skip-btn" onclick="closeOnboarding()">Add later</div>
             </div>
           </div>
-          <button class="btn btn-primary" onclick="closeOnboarding()">Explore Dashboard</button>
+
+          <!-- Step 2: First Expense -->
+          <div class="wizard-step" id="wizard-2">
+            <h1 class="intro-title" style="font-size:32px; margin-bottom:8px;">Add first expense</h1>
+            <p class="intro-desc" style="font-size:14px; margin-bottom:24px;">Log your first expense to see your dashboard in action.</p>
+            
+            <div class="cat-grid" style="margin-bottom:24px;">
+              <div class="cat-item selected" onclick="selectWizardCat('Fuel', this)"><div class="cat-item-icon">⛽</div><div class="cat-item-label">Fuel</div></div>
+              <div class="cat-item" onclick="selectWizardCat('Maintenance', this)"><div class="cat-item-icon">🔧</div><div class="cat-item-label">Service</div></div>
+              <div class="cat-item" onclick="selectWizardCat('Toll', this)"><div class="cat-item-icon">🛣️</div><div class="cat-item-label">Toll</div></div>
+              <div class="cat-item" onclick="selectWizardCat('Insurance', this)"><div class="cat-item-icon">🛡️</div><div class="cat-item-label">Insurance</div></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label class="intro-tag" style="margin-bottom:8px;">Amount (AED)</label>
+                <input type="number" id="wiz-exp-amount" placeholder="e.g. 150" class="form-input" style="width:100%; background:var(--card); font-size:24px; font-weight:700;">
+              </div>
+              <div>
+                <label class="intro-tag" style="margin-bottom:8px;">Date</label>
+                <input type="date" id="wiz-exp-date" class="form-input" style="width:100%; background:var(--card);">
+              </div>
+            </div>
+
+            <div style="margin-top:auto; padding-bottom:24px;">
+              <button class="intro-btn" onclick="finishAllSteps()">Finish <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <div style="text-align:center; margin-top:16px;" class="skip-btn" onclick="closeOnboarding()">Skip for now</div>
+            </div>
+          </div>
+
+          <!-- Step 3: All Set -->
+          <div class="wizard-step" id="wizard-3">
+             <div class="success-icon-anim" style="width:100px; height:100px; background:var(--green-bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 32px; border:2px solid rgba(30,196,110,0.25);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+             </div>
+             <h1 class="intro-title" style="font-size:32px; margin-bottom:12px; text-align:center;">You're all set!</h1>
+             <p class="intro-desc" style="font-size:16px; margin-bottom:40px; text-align:center; line-height:1.6; color:var(--text2);">
+                Your dashboard is ready. We'll remind you when it's time for more fuel or maintenance.
+             </p>
+             <div style="margin-top:auto; padding-bottom:32px;">
+                <button class="intro-btn" onclick="closeOnboarding(); renderDashboard();">Go to Dashboard <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+             </div>
+          </div>
         </div>
       </div>
 
@@ -1072,7 +1573,7 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
         </div>
         <div style="text-align:center;">
           <div class="topbar-title">Dashboard</div>
-          <div style="font-size:9px; color:var(--accent-light); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:-2px;">Fleet Mode Active</div>
+          <div onclick="showScreen('fleet')" style="font-size:9px; color:var(--accent2); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:-2px; cursor:pointer;">Fleet Mode Active</div>
         </div>
         <div class="topbar-action" onclick="openAddExpense()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1081,21 +1582,8 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 
       <div class="scroll-content">
         <!-- Vehicle Selector -->
-        <div class="vehicle-selector">
-          <div class="vehicle-chip active" onclick="switchVehicle(this)">
-            <span class="vehicle-chip-icon">🚗</span>
-            <span class="vehicle-chip-name">BMW X5</span>
-            <span class="vehicle-chip-plate">DXB•A1234</span>
-          </div>
-          <div class="vehicle-chip" onclick="switchVehicle(this)">
-            <span class="vehicle-chip-icon">🚙</span>
-            <span class="vehicle-chip-name">Toyota LC</span>
-            <span class="vehicle-chip-plate">DXB•B5678</span>
-          </div>
-          <div class="vehicle-chip" onclick="showAddVehicle()">
-            <span style="font-size:18px; color:var(--accent2)">＋</span>
-            <span class="vehicle-chip-name" style="color:var(--accent2)">Add</span>
-          </div>
+        <div class="vehicle-selector" id="vehicle-selector-container">
+          <!-- Dynamically populated -->
         </div>
 
         <!-- KPI Cards -->
@@ -1158,27 +1646,8 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 
         <!-- Recent Expenses -->
         <div class="sec-header"><div class="sec-title">Recent Expenses</div><div class="sec-link" onclick="showScreen('expenses')">View all</div></div>
-        <div class="card" style="padding:0; overflow:hidden;">
-          <div class="expense-row">
-            <div class="exp-icon" style="background:rgba(255,184,63,0.12)">⛽</div>
-            <div class="exp-info"><div class="exp-name">ADNOC Station</div><div class="exp-meta">Fuel · Today</div></div>
-            <div class="exp-amount neg">−AED 180</div>
-          </div>
-          <div class="expense-row">
-            <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🔧</div>
-            <div class="exp-info"><div class="exp-name">Al Futtaim Auto</div><div class="exp-meta">Maintenance · Yesterday</div></div>
-            <div class="exp-amount neg">−AED 450</div>
-          </div>
-          <div class="expense-row">
-            <div class="exp-icon" style="background:rgba(34,212,212,0.12)">🛣️</div>
-            <div class="exp-info"><div class="exp-name">Salik Toll</div><div class="exp-meta">Toll · Mar 18</div></div>
-            <div class="exp-amount neg">−AED 16</div>
-          </div>
-          <div class="expense-row">
-            <div class="exp-icon" style="background:rgba(168,85,247,0.12)">🧼</div>
-            <div class="exp-info"><div class="exp-name">Premium Car Wash</div><div class="exp-meta">Car Wash · Mar 16</div></div>
-            <div class="exp-amount neg">−AED 60</div>
-          </div>
+        <div class="card" style="padding:0; overflow:hidden;" id="recent-expenses-list">
+          <!-- Dynamically populated -->
         </div>
 
         <!-- Category Breakdown Sparklines -->
@@ -1200,25 +1669,27 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
             <div class="spark-val">480</div>
           </div>
           <div class="sparkline-wrap">
-            <div class="spark-label">🛣️ Toll</div>
-            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:14%;background:var(--teal)"></div></div>
-            <div class="spark-val">240</div>
-          </div>
-          <div class="sparkline-wrap">
-            <div class="spark-label">🧼 Other</div>
-            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:8%;background:var(--text3)"></div></div>
-            <div class="spark-val">127</div>
-          </div>
-        </div>
-
         <!-- AI Smart Insights -->
-        <div class="sec-header"><div class="sec-title">Smart Insights</div></div>
-        <div class="card ai-insight-card" style="border:1px solid rgba(124, 77, 255, 0.25); background: linear-gradient(135deg, rgba(124, 77, 255, 0.08), transparent);">
-          <div style="display:flex; gap:12px; align-items:flex-start;">
-            <div style="font-size:20px;">💡</div>
+        <div class="sec-header"><div class="sec-title">AI Smart Insights</div><div class="sec-link" onclick="showScreen('reports')">Explore</div></div>
+        <div class="card" style="background:linear-gradient(135deg, var(--bg3), var(--bg2)); border:1px solid rgba(108,124,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.25); cursor:pointer;" onclick="showScreen('reports')">
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+            <div style="width:36px; height:36px; background:var(--accent-glow); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">✨</div>
             <div>
-              <div style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px;">Fuel efficiency is up by 12%</div>
-              <div style="font-size:12px; color:var(--text3); line-height:1.5;">Since your last maintenance on BMW X5, your fuel consumption has flattened. Keep it up!</div>
+              <div style="font-size:14px; font-weight:700; color:var(--text);">Efficiency Analysis</div>
+              <div style="font-size:11px; color:var(--accent2); font-weight:600;">COMPUTED JUST NOW</div>
+            </div>
+          </div>
+          <div style="font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:14px;">
+            Your <span style="color:var(--text); font-weight:600;">BMW X5</span> shows a <span style="color:var(--green); font-weight:700;">12% improvement</span> in fuel efficiency after the last service. Maintenance is paying off!
+          </div>
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1; background:var(--bg3); padding:10px; border-radius:8px; border:0.5px solid var(--border);">
+              <div style="font-size:10px; color:var(--text3); text-transform:uppercase; margin-bottom:2px;">Projected Savings</div>
+              <div style="font-size:14px; font-weight:700; color:var(--green);">AED 420/mo</div>
+            </div>
+            <div style="flex:1; background:var(--bg3); padding:10px; border-radius:8px; border:0.5px solid var(--border);">
+              <div style="font-size:10px; color:var(--text3); text-transform:uppercase; margin-bottom:2px;">Next Service</div>
+              <div style="font-size:14px; font-weight:700; color:var(--amber);">In 1,400 km</div>
             </div>
           </div>
         </div>
@@ -2110,10 +2581,113 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
     </div>
   </div>
 
+  <!-- =================== FLEET MANAGEMENT SCREEN =================== -->
+  <div class="screen" id="screen-fleet">
+    <div class="topbar">
+      <div class="topbar-action" onclick="showScreen('profile')" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div><div class="topbar-title">Fleet Management</div></div>
+      <div class="topbar-action" onclick="showToast('Add vehicle to fleet')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <div style="padding:16px 16px 0;">
+        <div style="background:linear-gradient(135deg,#1a2246,#252d4a);border-radius:var(--radius);padding:18px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">Total Fleet Cost</div>
+            <div style="font-family:var(--font-num);font-size:38px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">AED 40.3k</div>
+            <div style="font-size:12px;color:var(--green);margin-top:6px;font-weight:500;">↑ 8% vs last month</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">Active Vehicles</div>
+            <div style="font-family:var(--font-num);font-size:38px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">5</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:6px;font-weight:400;">in your fleet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title">Fleet Overview</div></div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="expense-row" onclick="showToast('View BMW X5 fleet details')">
+          <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🚗</div>
+          <div class="exp-info"><div class="exp-name">BMW X5 — DXB·A1234</div><div class="exp-meta">AED 2.8k this month · 87,420 km</div></div>
+          <div class="exp-amount neg">−AED 2.8k</div>
+        </div>
+        <div class="expense-row" onclick="showToast('View Toyota LC fleet details')">
+          <div class="exp-icon" style="background:rgba(34,214,123,0.12)">🚙</div>
+          <div class="exp-info"><div class="exp-name">Toyota Land Cruiser — DXB·B5678</div><div class="exp-meta">AED 3.1k this month · 142,300 km</div></div>
+          <div class="exp-amount neg">−AED 3.1k</div>
+        </div>
+        <div class="expense-row" onclick="showToast('View Mercedes C-Class fleet details')">
+          <div class="exp-icon" style="background:rgba(168,85,247,0.12)">🚘</div>
+          <div class="exp-info"><div class="exp-name">Mercedes C-Class — AUH·C9012</div><div class="exp-meta">AED 2.1k this month · 65,100 km</div></div>
+          <div class="exp-amount neg">−AED 2.1k</div>
+        </div>
+        <div class="expense-row" onclick="showToast('View Ford F-150 fleet details')">
+          <div class="exp-icon" style="background:rgba(255,184,63,0.12)">🚚</div>
+          <div class="exp-info"><div class="exp-name">Ford F-150 — SHJ·D3456</div><div class="exp-meta">AED 4.5k this month · 110,500 km</div></div>
+          <div class="exp-amount neg">−AED 4.5k</div>
+        </div>
+        <div class="expense-row" onclick="showToast('View Nissan Patrol fleet details')">
+          <div class="exp-icon" style="background:rgba(255,91,106,0.12)">🚙</div>
+          <div class="exp-info"><div class="exp-name">Nissan Patrol — RAK·E7890</div><div class="exp-meta">AED 3.9k this month · 98,700 km</div></div>
+          <div class="exp-amount neg">−AED 3.9k</div>
+        </div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title">Fleet Alerts</div><div class="sec-link" onclick="showToast('View all fleet alerts')">See all</div></div>
+      <div id="fleet-alerts-container">
+        <div class="alert-card danger" id="fleet-alert-1">
+          <div class="alert-icon">⚙️</div>
+          <div>
+            <div class="alert-title">Oil Change Overdue</div>
+            <div class="alert-sub">BMW X5 · 850 km overdue</div>
+          </div>
+          <div class="alert-badge" onclick="resolveAlert(1, event)" style="cursor:pointer;background:var(--red-bg);border:1px solid var(--red);">Resolve</div>
+        </div>
+        <div class="alert-card warn" id="fleet-alert-2">
+          <div class="alert-icon">🛡️</div>
+          <div>
+            <div class="alert-title">Insurance Expires Soon</div>
+            <div class="alert-sub">Toyota LC · 10 days remaining</div>
+          </div>
+          <div class="alert-badge" onclick="resolveAlert(2, event)" style="cursor:pointer;background:var(--amber-bg);border:1px solid var(--amber);">Mark Done</div>
+        </div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title">Fleet Reports</div><div class="sec-link" onclick="showToast('View fleet reports')">View all</div></div>
+      <div class="card" style="padding:16px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;border-radius:12px;flex-shrink:0;
+                      background:linear-gradient(135deg,rgba(108,124,255,0.22),rgba(76,90,230,0.12));
+                      border:0.5px solid rgba(108,124,255,0.28);
+                      display:flex;align-items:center;justify-content:center;font-size:19px;">📊</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Monthly Fleet Summary</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Detailed breakdown of costs per vehicle</div>
+          </div>
+        </div>
+        <button style="width:100%;padding:12px;border:none;border-radius:100px;cursor:pointer;
+                       background:linear-gradient(135deg,#6C7CFF,#7B5EFF);font-size:14px;font-weight:600;
+                       color:white;font-family:var(--font);letter-spacing:0.01em;
+                       box-shadow:0 4px 12px rgba(108,124,255,0.3),inset 0 1px 0 rgba(255,255,255,0.15);
+                       transition:transform 0.18s cubic-bezier(0.22,1,0.36,1),box-shadow 0.18s;"
+                onclick="showToast('Generating fleet report')">Generate Report</button>
+      </div>
+    </div>
+  </div>
+
   <!-- =================== PROFILE SCREEN =================== -->
   <div class="screen" id="screen-profile">
     <div class="topbar">
-      <div class="topbar-title">Account</div>
+      <div class="topbar-title" style="display:flex; align-items:center; gap:8px;">
+        AutoTrack
+        <div class="fleet-badge" onclick="showScreen('fleet')" style="cursor:pointer;">Fleet Active</div>
+      </div>
       <div class="topbar-action" onclick="showToast('Settings saved')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="3"/>
@@ -2630,6 +3204,30 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
     </div>
     
     <div class="scroll-content">
+      <!-- =================== ADD VEHICLE MODAL =================== -->
+  <div class="modal" id="addVehicleModal" onclick="handleVehicleModalClose(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Vehicle</h3>
+        <button class="close-btn" onclick="closeAddVehicle()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label>Vehicle Name</label>
+          <input type="text" id="vName" placeholder="e.g. BMW X5, Tesla Model 3">
+        </div>
+        <div class="input-group">
+          <label>Plate Number</label>
+          <input type="text" id="vPlate" placeholder="e.g. DXB A 12345">
+        </div>
+        <div class="input-group">
+          <label>Current Odometer (km)</label>
+          <input type="number" id="vMileage" placeholder="0">
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="saveVehicle()">Save Vehicle</button>
+      </div>
+    </div>
+  </div>
       <!-- Search & Categories -->
       <div style="padding:16px 20px 0;">
         <div style="position:relative;margin-bottom:16px;">
@@ -2756,10 +3354,18 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 
         <div class="data-toggle-row">
           <div class="data-toggle-info">
-            <div class="data-toggle-label">Crash Reports</div>
-            <div class="data-toggle-sub">Automatically send error reports to help fix bugs faster. No personal data included.</div>
+            <div class="data-toggle-label">Clear All App Data</div>
+            <div class="data-toggle-sub">Permanently delete all vehicles, expenses, and settings from this device.</div>
           </div>
-          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+          <button class="btn btn-red btn-sm" onclick="clearAllData()">Reset App</button>
+        </div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">Load Sample Data</div>
+            <div class="data-toggle-sub">Populate AutoTrack with sample vehicles and expenses for demonstration.</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadSampleData()">Load Demo</button>
         </div>
       </div>
 
@@ -3002,8 +3608,46 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ============ GLOBAL APP STATE & CONSTANTS ============
+const SAMPLE_VEHICLES = [
+  { id: 'v1', name: 'BMW X5', plate: 'DXB•A1234', mileage: 87420, icon: '🚗' },
+  { id: 'v2', name: 'Toyota LC', plate: 'DXB•B5678', mileage: 42100, icon: '🚙' }
+];
+
+const SAMPLE_EXPENSES = [
+  { id: 101, vid: 'v1', name: 'ADNOC Station', cat: 'Fuel', date: 'Today', amount: -180, icon: '⛽', color: 'rgba(255,184,63,0.12)' },
+  { id: 102, vid: 'v1', name: 'Al Futtaim Auto', cat: 'Maintenance', date: 'Yesterday', amount: -450, icon: '🔧', color: 'rgba(79,110,247,0.12)' },
+  { id: 103, vid: 'v1', name: 'Salik Toll', cat: 'Toll', date: 'Mar 18', amount: -16, icon: '🛣️', color: 'rgba(34,212,212,0.12)' },
+  { id: 104, vid: 'v1', name: 'Premium Car Wash', cat: 'Other', date: 'Mar 16', amount: -60, icon: '🧼', color: 'rgba(168,85,247,0.12)' }
+];
+
+let vehicles = JSON.parse(localStorage.getItem('at_vehicles')) || [];
+let expenses = JSON.parse(localStorage.getItem('at_expenses')) || [];
+let currentScreen = 'home';
+let onboardingActive = false;
+
+function saveState() {
+  localStorage.setItem('at_vehicles', JSON.stringify(vehicles));
+  localStorage.setItem('at_expenses', JSON.stringify(expenses));
+}
+
+function loadSampleData() {
+  vehicles = [...SAMPLE_VEHICLES];
+  expenses = [...SAMPLE_EXPENSES];
+  saveState();
+  location.reload();
+}
+
+function clearAllData() {
+  vehicles = [];
+  expenses = [];
+  localStorage.removeItem('autotrack_returning_user');
+  saveState();
+  location.reload();
+}
+
 // ============ NAVIGATION ============
-const screens = ['home','expenses','maintenance','reports','vehicles','profile','receipt','privacy','terms','data-permissions','documents'];
+const screens = ['home','expenses','maintenance','reports','vehicles', 'profile','receipt','privacy','terms','data-permissions','documents', 'fleet'];
 
 function showScreen(name) {
   screens.forEach(s => {
@@ -3016,13 +3660,11 @@ function showScreen(name) {
   document.getElementById('nav-'+name)?.classList.add('active');
   const activeSvg = document.querySelector('#nav-'+name+' svg');
   if (activeSvg) activeSvg.style.stroke = '#6B84FF';
-  const dot = document.querySelector('#nav-'+name+' .nav-dot');
-  document.querySelectorAll('.nav-dot').forEach(d => d.remove());
-  if (document.getElementById('nav-'+name)) {
-    const d = document.createElement('div');
-    d.className = 'nav-dot';
-    document.getElementById('nav-'+name).appendChild(d);
-  }
+  
+  if (name === 'home') renderDashboard();
+  
+  const screen = document.getElementById('screen-' + name);
+  if (screen) setTimeout(() => animateNumbers(screen), 80);
 }
 
 // ============ MODALS ============
@@ -3116,15 +3758,40 @@ function showToast(msg) {
 }
 
 
-// ============ DELETE DATA MODAL ============
-function showDeleteDataModal() {
-  document.getElementById('deleteModal').classList.add('open');
+function showAddVehicle() { 
+  document.getElementById('addVehicleModal').classList.add('open');
 }
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.remove('open');
+function closeAddVehicle() {
+  document.getElementById('addVehicleModal').classList.remove('open');
+}
+function handleVehicleModalClose(e) {
+  if (e.target === document.getElementById('addVehicleModal')) closeAddVehicle();
 }
 
-function showAddVehicle() { showToast('Add vehicle flow'); }
+function saveVehicle() {
+  const name = document.getElementById('vName').value;
+  const plate = document.getElementById('vPlate').value;
+  const mileage = document.getElementById('vMileage').value;
+  
+  if (!name || !plate) {
+    showToast('Please enter name and plate number');
+    return;
+  }
+  
+  const newVehicle = {
+    id: 'v' + Date.now(),
+    name,
+    plate,
+    mileage: parseInt(mileage) || 0,
+    icon: '🚗'
+  };
+  
+  vehicles.push(newVehicle);
+  saveState();
+  closeAddVehicle();
+  renderDashboard();
+  showToast('✓ ' + name + ' added to your fleet');
+}
 
 // ============ RECEIPT SCREEN ============
 let rStep = 1, rOcrTimer = null, rCurrentVat = 5, rOcrFailed = false;
@@ -3249,10 +3916,9 @@ function rSetVat(val) {
       : 'padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;';
   });
   const customWrap = document.getElementById('rCustomVatWrap');
-  if (val==='custom') { customWrap.style.display='block'; return; }
-  customWrap.style.display='none';
+  if (customWrap) customWrap.style.display = (val === 'custom' ? 'block' : 'none');
   rCurrentVat = parseFloat(val);
-  document.getElementById('rVatPct') && (document.getElementById('rVatPct').value=val);
+  document.getElementById('rVatPct') && (document.getElementById('rVatPct').value = val);
   rRecalcVat();
 }
 
@@ -3314,11 +3980,7 @@ function rHandlePrimary() {
         btn.disabled=false;
         document.getElementById('rPrimaryLabel').textContent='Upload Receipt';
         rGoStep(1);
-       let vehicles = [
-      { id: 1, name: 'BMW X5', plate: 'DXB•A1234', mileage: 87420 },
-      { id: 2, name: 'Toyota LC', plate: 'DXB•B5678', mileage: 42100 }
-    ];
-    let currentScreen = 'home';
+        showScreen('home');
       },1500);
     },950);
   }
@@ -3556,8 +4218,206 @@ window.showScreen = function(name) {
   if (screen) setTimeout(() => animateNumbers(screen), 80);
 };
 
+// ============ DASHBOARD RENDERING ============
+function renderDashboard() {
+  renderVehicleSelector();
+  renderRecentExpenses();
+}
+
+function renderVehicleSelector() {
+  const container = document.getElementById('vehicle-selector-container');
+  if (!container) return;
+  
+  let html = '';
+  if (vehicles.length === 0) {
+    html = `
+      <div class="vehicle-chip active" onclick="showScreen('vehicles')">
+        <span style="font-size:18px; color:var(--accent2)">＋</span>
+        <span class="vehicle-chip-name" style="color:var(--accent2)">Add First Vehicle</span>
+      </div>
+    `;
+  } else {
+    vehicles.forEach((v, idx) => {
+      html += `
+        <div class="vehicle-chip ${idx===0?'active':''}" onclick="switchVehicle(this)">
+          <span class="vehicle-chip-icon">${v.icon||'🚗'}</span>
+          <span class="vehicle-chip-name">${v.name}</span>
+          <span class="vehicle-chip-plate">${v.plate}</span>
+        </div>
+      `;
+    });
+    html += `
+      <div class="vehicle-chip" onclick="showAddVehicle()">
+        <span style="font-size:18px; color:var(--accent2)">＋</span>
+        <span class="vehicle-chip-name" style="color:var(--accent2)">Add</span>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function renderRecentExpenses() {
+  const container = document.getElementById('recent-expenses-list');
+  if (!container) return;
+
+  if (expenses.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i style="font-size:32px; display:block; margin-bottom:12px; opacity:0.5;">📭</i>
+        <p style="color:var(--text3); font-size:14px; margin-bottom:16px;">No expenses recorded yet.</p>
+        <button class="btn btn-primary btn-sm" onclick="openAddExpense()">Record First Expense</button>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  expenses.slice(0, 5).forEach(ex => {
+    html += `
+      <div class="expense-row">
+        <div class="exp-icon" style="background:${ex.color||'rgba(255,184,63,0.1)'}">${ex.icon||'💰'}</div>
+        <div class="exp-info">
+          <div class="exp-name">${ex.name}</div>
+          <div class="exp-meta">${ex.cat} · ${ex.date}</div>
+        </div>
+        <div class="exp-amount neg">${ex.amount < 0 ? '−' : ''}AED ${Math.abs(ex.amount)}</div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// ============ HIGH-FIDELITY ONBOARDING LOGIC ============
+let currentIntroSlide = 1;
+let selectedVehicleType = 'car';
+
+function nextIntro(n) {
+  const current = document.getElementById(`intro-${currentIntroSlide}`);
+  const next = document.getElementById(`intro-${n}`);
+  
+  if (current && next) {
+    current.classList.remove('active');
+    current.classList.add('prev');
+    next.classList.add('active');
+    currentIntroSlide = n;
+  }
+}
+
+function startWizard() {
+  // Hide all intros
+  document.querySelectorAll('.intro-slide').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  // Show wizard
+  document.getElementById('wizard-container').style.display = 'flex';
+}
+
+function selectType(type, el) {
+  selectedVehicleType = type;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updateWizardProgress(step) {
+  document.querySelectorAll('.prog-dot-wrap').forEach((w, i) => {
+    if (i + 1 < step) {
+      w.classList.add('done');
+      w.classList.remove('active');
+    } else if (i + 1 === step) {
+      w.classList.add('active');
+      w.classList.remove('done');
+    } else {
+      w.classList.remove('active', 'done');
+    }
+  });
+}
+
+let selectedWizardCat = 'Fuel';
+
+function selectWizardCat(cat, el) {
+  selectedWizardCat = cat;
+  document.querySelectorAll('#wizard-2 .cat-item').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function goToWizardStep(step) {
+  if (step === 2) {
+    const model = document.getElementById('wiz-model').value;
+    const plate = document.getElementById('wiz-plate').value;
+    if (!model || !plate) {
+      showToast('Please enter at least the model and plate number');
+      return;
+    }
+    // Save vehicle temporarily or just proceed
+    document.getElementById('wiz-exp-date').valueAsDate = new Date();
+  }
+  
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`wizard-${step}`).classList.add('active');
+  updateWizardProgress(step);
+}
+
+function finishAllSteps() {
+  // Save Vehicle
+  const model = document.getElementById('wiz-model').value;
+  const plate = document.getElementById('wiz-plate').value;
+  const year = document.getElementById('wiz-year').value;
+  const odo = document.getElementById('wiz-odo').value;
+  const icons = { car: '🚗', suv: '🚙', van: '🚚', truck: '🚛', bus: '🚌', moto: '🏍️' };
+  
+  const vId = 'v' + Date.now();
+  const v = {
+    id: vId,
+    name: model,
+    plate: plate,
+    year: year,
+    fuel: document.getElementById('wiz-fuel').value,
+    mileage: parseInt(odo) || 0,
+    icon: icons[selectedVehicleType] || '🚗'
+  };
+  vehicles.push(v);
+  
+  // Save Expense (if amount entered)
+  const amt = document.getElementById('wiz-exp-amount').value;
+  if (amt && parseFloat(amt) > 0) {
+    const ex = {
+      id: Date.now(),
+      vid: vId,
+      name: 'Initial Log',
+      cat: selectedWizardCat,
+      date: 'Today',
+      amount: -parseFloat(amt),
+      icon: '⛽', // Default
+      color: 'rgba(79,110,247,0.1)'
+    };
+    expenses.push(ex);
+  }
+  
+  saveState();
+  
+  // Transition to All Set!
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wizard-3').classList.add('active');
+  updateWizardProgress(3);
+  showToast('✓ Setup complete!');
+}
+
+function checkFirstTime() {
+  // If no vehicles and no expenses, it's definitely first time
+  if (vehicles.length === 0 && expenses.length === 0) {
+    onboardingActive = true;
+    document.getElementById('onboarding-overlay').style.display = 'flex';
+  } else if (!localStorage.getItem('autotrack_returning_user')) {
+    onboardingActive = true;
+    document.getElementById('onboarding-overlay').style.display = 'flex';
+  }
+}
+
 // Run on initial load
 document.addEventListener('DOMContentLoaded', () => {
+  checkFirstTime();
+  renderDashboard();
   setTimeout(() => animateNumbers(document.getElementById('screen-home')), 300);
 });
 </script>
