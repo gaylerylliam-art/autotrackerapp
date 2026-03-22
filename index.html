@@ -692,16 +692,21 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   inset: 0;
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 40px 24px;
+  background: var(--bg);
   opacity: 0;
   transform: translateX(100%);
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   background: radial-gradient(circle at top right, rgba(124,77,255,0.15), transparent 70%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .intro-slide.active {
   opacity: 1;
   transform: translateX(0);
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .intro-slide.prev {
@@ -776,6 +781,8 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 .intro-content {
   margin-top: auto;
   padding-bottom: 40px;
+  position: relative;
+  z-index: 10;
 }
 
 .intro-tag {
@@ -4292,12 +4299,16 @@ let currentIntroSlide = 1;
 let selectedVehicleType = 'car';
 
 function nextIntro(n) {
-  const current = document.getElementById(`intro-${currentIntroSlide}`);
+  const current = document.querySelector('.intro-slide.active');
   const next = document.getElementById(`intro-${n}`);
   
   if (current && next) {
     current.classList.remove('active');
     current.classList.add('prev');
+    next.classList.add('active');
+    currentIntroSlide = n;
+  } else if (next) {
+    // If somehow active is missing, just show next
     next.classList.add('active');
     currentIntroSlide = n;
   }
