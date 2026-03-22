@@ -389,26 +389,32 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 .sec-title { font-size: 15px; font-weight: 600; color: var(--text); }
 .sec-link { font-size: 13px; color: var(--accent2); cursor: pointer; }
 
-/* VEHICLE SELECTOR */
 .vehicle-selector {
-  display: flex; gap: 10px; padding: 12px 16px; overflow-x: auto;
+  display: flex; gap: 12px; padding: 12px 20px 24px; overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
 }
 .vehicle-selector::-webkit-scrollbar { display: none; }
 .vehicle-chip {
-  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
-  border-radius: 100px; border: 1px solid rgba(255,255,255,0.18); background: var(--card2);
-  white-space: nowrap; cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-width: 180px;
+  border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: var(--card2);
+  white-space: nowrap; cursor: pointer; transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1); flex-shrink: 0;
+  scroll-snap-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
 }
-.vehicle-chip.active { background: var(--accent); border-color: var(--accent); }
-.vehicle-chip-icon { font-size: 16px; }
-.vehicle-chip-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.vehicle-chip.active .vehicle-chip-name { color: white; }
+.vehicle-chip.active { 
+  background: var(--accent); border-color: rgba(255,255,255,0.25); 
+  box-shadow: 0 8px 24px rgba(108,124,255,0.35);
+  transform: translateY(-2px);
+}
+.vehicle-chip-icon { font-size: 20px; }
+.vehicle-chip-name { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2; }
 .vehicle-chip-plate {
-  font-size: 10px; background: rgba(255,255,255,0.12); padding: 2px 6px;
-  border-radius: 4px; color: var(--text2); letter-spacing: 0.4px;
+  font-size: 10px; opacity: 0.6; color: var(--text2); letter-spacing: 0.05em; margin-top: 2px;
 }
-.vehicle-chip.active .vehicle-chip-plate { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); }
+.vehicle-chip.active .vehicle-chip-name, .vehicle-chip.active .vehicle-chip-plate { color: white; opacity: 1; }
+.vehicle-chip.add-chip { border: 1.5px dashed var(--border2); background: transparent; }
 
 /* ALERT CARDS */
 .alert-card {
@@ -677,6 +683,29 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 }
 
 /* =================== HIGH-FIDELITY ONBOARDING =================== */
+.section-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 0 20px; 
+  margin: 24px 0 12px; 
+}
+.section-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.01em; transition: all 0.2s; }
+.section-hint { font-size: 11px; font-weight: 400; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+
+.vehicle-chip-price { font-size: 11px; font-weight: 500; color: var(--accent2); margin-top: 4px; opacity: 0.8; }
+.vehicle-chip.active .vehicle-chip-price { color: white; opacity: 1; }
+
+.pulse-update {
+  animation: pulseUpdate 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pulseUpdate {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(0.96); opacity: 0.85; filter: blur(1px); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+
 .onboarding-overlay {
   position: fixed;
   inset: 0;
@@ -1144,8 +1173,14 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
     </div>
 
     <div class="scroll-content">
+      <!-- Vehicle Selector Header -->
+      <div class="section-header">
+        <div class="section-title">Your vehicles</div>
+        <div class="section-hint">Swipe to switch <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      
       <!-- Vehicle Selector -->
-      <div class="vehicle-selector">
+      <div class="vehicle-selector" id="vehicle-selector-container">
         <div class="vehicle-chip active">
           <span class="vehicle-chip-icon">🚗</span>
           <span class="vehicle-chip-name">BMW X5</span>
@@ -1166,22 +1201,22 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-label">This Month</div>
-          <div class="kpi-value">AED 2.8k</div>
+          <div class="kpi-value" id="kpi-month">AED 2.8k</div>
           <div class="kpi-trend up">↑ 12% vs last</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Cost / km</div>
-          <div class="kpi-value">AED 0.94</div>
+          <div class="kpi-value" id="kpi-cost-km">AED 0.94</div>
           <div class="kpi-trend down">↓ 5% improved</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Odometer</div>
-          <div class="kpi-value">87,420</div>
+          <div class="kpi-value" id="kpi-odo">87,420</div>
           <div class="kpi-sub">km recorded</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">YTD Total</div>
-          <div class="kpi-value">AED 18.2k</div>
+          <div class="kpi-value" id="kpi-ytd">AED 18.2k</div>
           <div class="kpi-sub">Jan – Mar 2026</div>
         </div>
       </div>
@@ -3693,21 +3728,34 @@ function handleModalClose(e) {
 }
 
 // ============ CATEGORY SELECT ============
-function switchVehicle(el) {
+let activeVehicleId = null;
+
+function switchVehicle(el, vId) {
+  if (el.classList.contains('active')) return;
+  activeVehicleId = vId;
+  
   document.querySelectorAll('.vehicle-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   
-  // Trigger KPI re-sync animation
-  document.querySelectorAll('.kpi-card').forEach(k => {
-    k.style.transform = 'scale(0.95)';
-    k.style.opacity = '0.5';
-    setTimeout(() => {
-      k.style.transform = 'scale(1)';
-      k.style.opacity = '1';
-    }, 300);
+  // Update dashboard sections with animation
+  const dashboardSections = ['.kpi-grid', '#spendChart', '#recent-expenses-list', '#alerts-container'];
+  dashboardSections.forEach(sel => {
+    const section = document.querySelector(sel);
+    if (section) {
+      section.classList.remove('pulse-update');
+      void section.offsetWidth; // trigger reflow
+      section.classList.add('pulse-update');
+    }
   });
   
+  renderDashboardData();
+  
   showToast('Switching to ' + el.querySelector('.vehicle-chip-name').innerText);
+  
+  // Re-run number animations
+  setTimeout(() => {
+    animateNumbers(document.getElementById('screen-home'));
+  }, 100);
 }
 function selectCat(el) {
   document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('selected'));
@@ -4227,36 +4275,90 @@ window.showScreen = function(name) {
 
 // ============ DASHBOARD RENDERING ============
 function renderDashboard() {
+  if (vehicles.length > 0 && !activeVehicleId) {
+    activeVehicleId = vehicles[0].id;
+  }
   renderVehicleSelector();
+  renderDashboardData();
+}
+
+function renderDashboardData() {
   renderRecentExpenses();
+  
+  const currentMonth = new Date().toLocaleString('default', { month: 'short' });
+  const activeVehicle = vehicles.find(v => v.id === activeVehicleId) || vehicles[0];
+  
+  if (!activeVehicle) return;
+
+  // Filter expenses for active vehicle
+  const vExpenses = expenses.filter(ex => ex.vid === activeVehicle.id);
+  
+  // This Month
+  const monthlyTotal = vExpenses
+    .filter(ex => ex.date === 'Today' || ex.date === 'Yesterday' || ex.date.includes(currentMonth))
+    .reduce((sum, ex) => sum + Math.abs(ex.amount), 0);
+  
+  // Odometer
+  const currentOdo = activeVehicle.mileage || 0;
+  
+  // YTD
+  const ytdTotal = vExpenses.reduce((sum, ex) => sum + Math.abs(ex.amount), 0);
+
+  // Update DOM
+  const monthEl = document.getElementById('kpi-month');
+  const odoEl = document.getElementById('kpi-odo');
+  const ytdEl = document.getElementById('kpi-ytd');
+  const costKmEl = document.getElementById('kpi-cost-km');
+
+  if (monthEl) monthEl.textContent = 'AED ' + (monthlyTotal >= 1000 ? (monthlyTotal/1000).toFixed(1) + 'k' : monthlyTotal);
+  if (odoEl) odoEl.textContent = currentOdo.toLocaleString();
+  if (ytdEl) ytdEl.textContent = 'AED ' + (ytdTotal >= 1000 ? (ytdTotal/1000).toFixed(1) + 'k' : ytdTotal);
+  
+  if (costKmEl) {
+    const costKm = currentOdo > 0 ? (ytdTotal / currentOdo).toFixed(2) : '0.00';
+    costKmEl.textContent = 'AED ' + costKm;
+  }
 }
 
 function renderVehicleSelector() {
   const container = document.getElementById('vehicle-selector-container');
   if (!container) return;
   
+  const currentMonth = new Date().toLocaleString('default', { month: 'short' });
+  
   let html = '';
   if (vehicles.length === 0) {
     html = `
       <div class="vehicle-chip active" onclick="showScreen('vehicles')">
-        <span style="font-size:18px; color:var(--accent2)">＋</span>
-        <span class="vehicle-chip-name" style="color:var(--accent2)">Add First Vehicle</span>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size:18px; color:var(--accent2)">＋</span>
+          <span class="vehicle-chip-name" style="color:var(--accent2)">Add First</span>
+        </div>
       </div>
     `;
   } else {
     vehicles.forEach((v, idx) => {
+      // Calculate monthly spent
+      const monthlyTotal = expenses
+        .filter(ex => ex.vid === v.id && (ex.date === 'Today' || ex.date === 'Yesterday' || ex.date.includes(currentMonth)))
+        .reduce((sum, ex) => sum + Math.abs(ex.amount), 0);
+        
+      const isActive = activeVehicleId ? v.id === activeVehicleId : idx === 0;
+        
       html += `
-        <div class="vehicle-chip ${idx===0?'active':''}" onclick="switchVehicle(this)">
+        <div class="vehicle-chip ${isActive?'active':''}" onclick="switchVehicle(this, '${v.id}')">
           <span class="vehicle-chip-icon">${v.icon||'🚗'}</span>
-          <span class="vehicle-chip-name">${v.name}</span>
-          <span class="vehicle-chip-plate">${v.plate}</span>
+          <div style="flex:1; min-width:0;">
+            <div class="vehicle-chip-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${v.name}</div>
+            <div class="vehicle-chip-plate">${v.plate}</div>
+          </div>
+          <div class="vehicle-chip-price">AED ${monthlyTotal.toLocaleString()}</div>
         </div>
       `;
     });
     html += `
-      <div class="vehicle-chip" onclick="showAddVehicle()">
-        <span style="font-size:18px; color:var(--accent2)">＋</span>
-        <span class="vehicle-chip-name" style="color:var(--accent2)">Add</span>
+      <div class="vehicle-chip add-chip" onclick="showAddVehicle()" style="min-width:60px; justify-content:center;">
+        <span style="font-size:20px; color:var(--accent2)">+</span>
       </div>
     `;
   }
@@ -4267,11 +4369,14 @@ function renderRecentExpenses() {
   const container = document.getElementById('recent-expenses-list');
   if (!container) return;
 
-  if (expenses.length === 0) {
+  const vId = activeVehicleId || (vehicles.length > 0 ? vehicles[0].id : null);
+  const vExpenses = vId ? expenses.filter(ex => ex.vid === vId) : [];
+
+  if (vExpenses.length === 0) {
     container.innerHTML = `
-      <div class="empty-state">
+      <div class="empty-state" style="padding:20px 0;">
         <i style="font-size:32px; display:block; margin-bottom:12px; opacity:0.5;">📭</i>
-        <p style="color:var(--text3); font-size:14px; margin-bottom:16px;">No expenses recorded yet.</p>
+        <p style="color:var(--text3); font-size:14px; margin-bottom:16px;">No expenses for this vehicle.</p>
         <button class="btn btn-primary btn-sm" onclick="openAddExpense()">Record First Expense</button>
       </div>
     `;
@@ -4279,7 +4384,7 @@ function renderRecentExpenses() {
   }
 
   let html = '';
-  expenses.slice(0, 5).forEach(ex => {
+  vExpenses.slice(0, 5).forEach(ex => {
     html += `
       <div class="expense-row">
         <div class="exp-icon" style="background:${ex.color||'rgba(255,184,63,0.1)'}">${ex.icon||'💰'}</div>
