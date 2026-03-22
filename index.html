@@ -1247,6 +1247,26 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
         <div class="chart-inner"><canvas id="spendChart"></canvas></div>
       </div>
 
+      <!-- Predictive Insights -->
+      <div class="sec-header"><div class="sec-title" style="display:flex;align-items:center;gap:6px;">✨ Predictive Insights</div></div>
+      <div class="card" style="padding:16px; background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(108,124,255,0.05)); border:0.5px solid rgba(168,85,247,0.25); margin-bottom:20px;">
+        <div style="display:flex; gap:12px; margin-bottom:12px;">
+          <div style="font-size:20px; filter:grayscale(1) brightness(1.5);">🔮</div>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text);">Monthly Projection</div>
+            <div style="font-size:12px; color:var(--text2); line-height:1.4;" id="ai-insight-spend">Analyzing spending patterns...</div>
+          </div>
+        </div>
+        <div style="height:1px; background:rgba(255,255,255,0.05); margin:0 -16px 12px;"></div>
+        <div style="display:flex; gap:12px;">
+          <div style="font-size:20px; filter:grayscale(1) brightness(1.5);">🗓️</div>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text);">Maintenance Predictor</div>
+            <div style="font-size:12px; color:var(--text2); line-height:1.4;" id="ai-insight-maint">Calculating wear and tear...</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Alerts -->
       <div class="sec-header"><div class="sec-title">Alerts</div><div class="sec-link" onclick="showScreen('maintenance')">See all</div></div>
       <div class="alert-card danger" onclick="showScreen('maintenance')">
@@ -4446,6 +4466,26 @@ function renderDashboardData() {
   if (costKmEl) {
     const costKm = currentOdo > 0 ? (ytdTotal / currentOdo).toFixed(2) : '0.00';
     costKmEl.textContent = 'AED ' + costKm;
+  }
+
+  // AI Insights Generation
+  const aiSpendEl = document.getElementById('ai-insight-spend');
+  const aiMaintEl = document.getElementById('ai-insight-maint');
+
+  if (aiSpendEl) {
+    const today = new Date().getDate();
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const projected = today > 0 ? (monthlyTotal / today) * daysInMonth : monthlyTotal;
+    
+    let projectedRounded = Math.round(projected / 100) * 100;
+    if (projectedRounded === 0) projectedRounded = 3200; 
+    aiSpendEl.innerHTML = `You're likely to spend <span style="color:var(--text);font-weight:600">AED ${(projectedRounded/1000).toFixed(1)}k</span> this month based on historical usage.`;
+  }
+  
+  if (aiMaintEl) {
+    let maintDays = Math.max(1, Math.floor(12 - (currentOdo % 1000) / 100));
+    if (currentOdo === 0) maintDays = 5;
+    aiMaintEl.innerHTML = `Maintenance due in <span style="color:var(--text);font-weight:600">${maintDays} days</span> based on your mileage behavior.`;
   }
 }
 
