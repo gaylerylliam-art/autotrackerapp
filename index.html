@@ -4163,9 +4163,44 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+    // Custom plugin to draw average line
+    const avgLinePlugin = {
+      id: 'avgLine',
+      afterDraw(chart) {
+        const { ctx, chartArea, scales: { x, y } } = chart;
+        if (!chartArea) return;
+        const { top, bottom, left, right } = chartArea;
+        
+        let sum = 0, count = 0;
+        chart.data.datasets.forEach(ds => {
+          const v = ds.data.filter(d => d);
+          sum += v.reduce((a,b)=>a+b, 0);
+          count += v.length;
+        });
+        if (count === 0) return;
+        const avg = sum / count;
+        const yPos = y.getPixelForValue(avg);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(left, yPos);
+        ctx.lineTo(right, yPos);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '10px var(--font)';
+        ctx.textAlign = 'right';
+        ctx.fillText('AVG: AED ' + (avg/1000).toFixed(1) + 'k', right - 5, yPos - 6);
+        ctx.restore();
+      }
+    };
+
     new Chart(spendCtx, {
       type: 'bar',
-      plugins: [glowPlugin],
+      plugins: [glowPlugin, avgLinePlugin],
       data: {
         labels: ['Oct','Nov','Dec','Jan','Feb','Mar'],
         datasets: [{
@@ -4213,15 +4248,27 @@ document.addEventListener('DOMContentLoaded', () => {
           delay: (ctx) => ctx.type === 'data' && ctx.mode === 'default' ? ctx.dataIndex * 60 : 0,
         },
         plugins: { legend: { display: false }, tooltip: {
-          backgroundColor: 'rgba(18,22,40,0.82)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
-          padding: { top: 7, bottom: 7, left: 10, right: 10 },
-          titleColor: '#8E97B4', titleFont: { size: 11, weight: '400' },
-          bodyColor: '#F0F2FA', bodyFont: { size: 13, weight: '600' },
-          callbacks: { label: (c) => 'AED ' + c.raw.toLocaleString() }
+          backgroundColor: 'rgba(18,22,40,0.92)', borderColor: 'rgba(108,124,255,0.2)', borderWidth: 1,
+          padding: { top: 10, bottom: 10, left: 12, right: 12 },
+          titleColor: '#8E97B4', titleFont: { size: 12, weight: '500' },
+          bodyColor: '#FFFFFF', bodyFont: { size: 15, weight: '700' },
+          footerColor: '#5EF7A6', footerFont: { size: 11, weight: '600' },
+          callbacks: { 
+            title: (c) => c[0].label + ' Spending',
+            label: (c) => 'AED ' + c.raw.toLocaleString(),
+            footer: (c) => {
+              const idx = c[0].dataIndex;
+              if (idx === 0) return '';
+              const prev = c[0].dataset.data[idx-1];
+              if (!prev) return '';
+              const diff = ((c[0].raw - prev) / prev * 100).toFixed(1);
+              return diff > 0 ? `↑ ${diff}% vs prev month` : `↓ ${Math.abs(diff)}% vs prev month`;
+            }
+          }
         }},
         scales: {
-          x: { grid: { display: false }, ticks: { color: '#5A6180', font: { size: 12 } }, border: { display: false } },
-          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5A6180', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
+          x: { grid: { display: false }, ticks: { color: '#8E97B4', font: { size: 12 } }, border: { display: false } },
+          y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8E97B4', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
         }
       }
     });
@@ -4250,18 +4297,24 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: { legend: { display: false }, tooltip: {
-          backgroundColor: 'rgba(18,22,40,0.82)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
-          padding: { top: 7, bottom: 7, left: 10, right: 10 },
-          titleColor: '#8E97B4', titleFont: { size: 11, weight: '400' },
-          bodyColor: '#F0F2FA', bodyFont: { size: 13, weight: '600' },
-          callbacks: { label: c => c.dataset.label + ': AED ' + (c.raw||0).toLocaleString() }
+          backgroundColor: 'rgba(18,22,40,0.92)', borderColor: 'rgba(108,124,255,0.2)', borderWidth: 1,
+          padding: { top: 10, bottom: 10, left: 12, right: 12 },
+          titleColor: '#8E97B4', titleFont: { size: 12, weight: '500' },
+          bodyColor: '#FFFFFF', bodyFont: { size: 15, weight: '700' },
+          usePointStyle: true, boxPadding: 6,
+          callbacks: { 
+            title: (c) => c[0].label + ' Trends',
+            label: (c) => c.dataset.label + ': AED ' + (c.raw||0).toLocaleString() 
+          }
         }},
         scales: {
-          x: { grid: { display: false }, ticks: { color: '#5A6180', font: { size: 11 } }, border: { display: false } },
-          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5A6180', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
+          x: { grid: { display: false }, ticks: { color: '#8E97B4', font: { size: 12 } }, border: { display: false } },
+          y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8E97B4', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
         }
-      }
+      },
+      plugins: [avgLinePlugin]
     });
   }
 
