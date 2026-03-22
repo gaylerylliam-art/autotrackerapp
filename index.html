@@ -367,6 +367,19 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   text-transform: uppercase; letter-spacing: 0.08em;
   margin-bottom: 12px; margin-left: 4px;
 }
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 24px 20px 0; margin-bottom: -4px;
+}
+.section-title { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.section-hint {
+  font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px;
+  animation: gentleBounceX 2s infinite ease-in-out;
+}
+@keyframes gentleBounceX {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
 .kpi-label {
   font-size: 10px; font-weight: 700; color: var(--text3);
   text-transform: uppercase; letter-spacing: 0.06em;
@@ -414,6 +427,13 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   font-size: 10px; opacity: 0.6; color: var(--text2); letter-spacing: 0.05em; margin-top: 2px;
 }
 .vehicle-chip.active .vehicle-chip-name, .vehicle-chip.active .vehicle-chip-plate { color: white; opacity: 1; }
+.vehicle-chip-price {
+  font-size: 12px; font-weight: 700; font-family: var(--font-num); color: var(--text2);
+  margin-left: auto; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;
+}
+.vehicle-chip.active .vehicle-chip-price {
+  background: rgba(255,255,255,0.2); color: white;
+}
 .vehicle-chip.add-chip { border: 1.5px dashed var(--border2); background: transparent; }
 
 /* ALERT CARDS */
