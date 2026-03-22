@@ -2500,6 +2500,12 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
       </div>
     </div>
     <div class="scroll-content">
+      <div style="padding:16px;">
+        <button class="btn btn-outline" style="width:100%; margin-bottom: 16px;" onclick="showScreen('toll-settings')">
+          Manage Auto-Import Toll Invoices
+        </button>
+      </div>
+    <div class="scroll-content">
       <!-- Vehicle Card 1 -->
       <div class="vehicle-card" onclick="showToast('BMW X5 details')">
         <div class="vehicle-card-header">
@@ -2719,6 +2725,56 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
                        box-shadow:0 4px 12px rgba(108,124,255,0.3),inset 0 1px 0 rgba(255,255,255,0.15);
                        transition:transform 0.18s cubic-bezier(0.22,1,0.36,1),box-shadow 0.18s;"
                 onclick="showToast('Generating fleet report')">Generate Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== TOLL SETTINGS SCREEN =================== -->
+  <div class="screen" id="screen-toll-settings">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Auto-Import Tolls</div>
+        <div class="topbar-sub">Manage provider connections</div>
+      </div>
+      <div class="topbar-action" onclick="simulateTollImport()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content" style="padding: 16px;">
+      
+      <div class="sec-header" style="padding: 0 0 12px 0;"><div class="sec-title">Connected Providers</div></div>
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="expense-row" style="padding: 0 0 12px 0;">
+          <div class="exp-icon" style="background:#4F6EF733; color:#4F6EF7;">S</div>
+          <div class="exp-info"><div class="exp-name">Salik Account</div><div class="exp-meta">Status: Connected</div></div>
+          <div class="switch on"><div class="switch-thumb"></div></div>
+        </div>
+        <div class="expense-row" style="padding: 12px 0 0 0;">
+          <div class="exp-icon" style="background:#5A618033; color:#5A6180;">F</div>
+          <div class="exp-info"><div class="exp-name">FasTrak</div><div class="exp-meta">Status: Not Connected</div></div>
+          <button class="btn btn-primary btn-sm">Connect API</button>
+        </div>
+      </div>
+
+      <div class="sec-header" style="padding: 0 0 12px 0;"><div class="sec-title">Tag Mapping</div></div>
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="kpi-label" style="margin-bottom:5px;">Tag: SLK-987654</div>
+        <div style="position:relative;">
+          <select class="text-input" style="appearance:none;cursor:pointer;padding-right:36px;" id="toll-map-1">
+            <option value="v1">🚗 BMW X5 — DXB·A1234</option>
+            <option value="v2">🚙 Toyota Land Cruiser — DXB·B5678</option>
+          </select>
+          <div style="position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        </div>
+      </div>
+
+      <div class="sec-header" style="padding: 0 0 12px 0;"><div class="sec-title">Recent Auto-Imports</div></div>
+      <div id="toll-logs-container">
+        <!-- Logs rendered here -->
       </div>
     </div>
   </div>
@@ -4534,6 +4590,168 @@ function checkFirstTime() {
     document.getElementById('onboarding-overlay').style.display = 'flex';
   }
 }
+
+// =================== TOLL INVOICE SIMULATION ENGINE ===================
+
+let tollLogs = loadData('autotrack_toll_logs', []);
+let processedInvoices = loadData('autotrack_processed_invoices', {});
+
+function simulateTollImport() {
+  showToast("Fetching invoices via API...");
+  
+  // Create a mock payload from "Salik"
+  const mockPayloads = [
+    {
+      source: 'Salik',
+      invoice_id: 'INV-' + Math.floor(Math.random() * 100000),
+      transaction_id: 'TXN-' + Date.now(),
+      vehicle_plate: 'DXB-A1234', // matches BMW
+      toll_tag_id: 'SLK-987654',
+      event_date: new Date().toISOString(),
+      location: 'Al Barsha Gate',
+      amount: 4.00,
+      currency: 'AED',
+      attachment_url: 'https://salik.com/invoice/pdf/123'
+    },
+    {
+      source: 'Salik',
+      invoice_id: 'INV-DUP-999',
+      transaction_id: 'TXN-DUP-999',
+      vehicle_plate: 'DXB-A1234',
+      toll_tag_id: 'SLK-987654',
+      event_date: new Date().toISOString(),
+      location: 'Safa Gate',
+      amount: 4.00,
+      currency: 'AED'
+    },
+    {
+      source: 'FasTrak',
+      invoice_id: 'INV-UNK-111',
+      transaction_id: 'TXN-UNK-111',
+      vehicle_plate: 'UKN-0000', // Unknown plate
+      toll_tag_id: 'FT-111222',
+      event_date: new Date().toISOString(),
+      location: 'Golden Gate Bridge',
+      amount: 8.50,
+      currency: 'USD'
+    }
+  ];
+
+  // Process payloads after simulated delay
+  setTimeout(() => {
+    let imported = 0;
+    let dupes = 0;
+    let needsReview = 0;
+
+    mockPayloads.forEach(payload => {
+      // 1. Deduplication
+      const duplicateKey = payload.source + ':' + payload.invoice_id;
+      if (processedInvoices[duplicateKey]) {
+        dupes++;
+        logTollEvent(payload, 'Duplicate', 'Skipped duplicate invoice.');
+        return;
+      }
+
+      // Hack to ensure INV-DUP-999 is counted as duplicate next time
+      if (payload.invoice_id === 'INV-DUP-999') {
+        processedInvoices[duplicateKey] = true;
+      }
+
+      // 2. Vehicle Matching
+      // Match by exact plate or map
+      let matchedVehicle = vehicles.find(v => v.plate.replace(/\s|-/g, '').includes(payload.vehicle_plate.replace(/\s|-/g, '')));
+      
+      if (!matchedVehicle) {
+        // Fallback to manual map UI logic if implemented, else needs review
+        needsReview++;
+        logTollEvent(payload, 'Needs Review', 'Could not match plate automatically.');
+        return;
+      }
+
+      // 3. Create Expense Entry
+      expenses.unshift({
+        id: 'exp_' + Date.now() + Math.random(),
+        vid: matchedVehicle.id,
+        amount: -payload.amount,
+        name: payload.source + ' — ' + payload.location,
+        cat: 'Toll',
+        subcat: 'electronic_toll',
+        date: 'Today', // simplified
+        icon: '🛣️',
+        color: 'rgba(34,212,212,0.12)',
+        status: 'auto_imported',
+        rawPayload: payload
+      });
+
+      processedInvoices[duplicateKey] = true;
+      saveData('autotrack_expenses', expenses);
+      saveData('autotrack_processed_invoices', processedInvoices);
+      
+      imported++;
+      logTollEvent(payload, 'Imported', 'Successfully attached to ' + matchedVehicle.name);
+    });
+    
+    // Notifications & UI Refresh
+    if (imported > 0) showToast(`Imported ${imported} new toll entries.`);
+    if (needsReview > 0) showToast(`${needsReview} invoices need review.`, 'var(--amber)');
+    
+    renderDashboard();
+    renderTollLogs();
+  }, 1000);
+}
+
+function logTollEvent(payload, status, message) {
+  tollLogs.unshift({
+    timestamp: new Date().toLocaleTimeString(),
+    invoice: payload.invoice_id,
+    source: payload.source,
+    amount: payload.amount,
+    status: status,
+    message: message
+  });
+  if (tollLogs.length > 50) tollLogs.pop();
+  saveData('autotrack_toll_logs', tollLogs);
+}
+
+function renderTollLogs() {
+  const container = document.getElementById('toll-logs-container');
+  if (!container) return;
+  
+  if (tollLogs.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3); font-size:13px; text-align:center; padding:20px;">No import logs yet.</div>';
+    return;
+  }
+
+  let html = '';
+  tollLogs.forEach(log => {
+    let color = 'var(--text2)';
+    let badgeStyle = 'background:rgba(255,255,255,0.1); color:var(--text2)';
+    if (log.status === 'Imported') badgeStyle = 'background:var(--green-bg); color:var(--green)';
+    if (log.status === 'Duplicate') badgeStyle = 'background:var(--bg4); color:var(--text3)';
+    if (log.status === 'Needs Review') badgeStyle = 'background:var(--amber-bg); color:var(--amber)';
+    if (log.status === 'Failed') badgeStyle = 'background:var(--red-bg); color:var(--red)';
+
+    html += `
+      <div class="card card-sm">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <div style="font-weight:600; font-size:12px;">${log.source} — ${log.invoice}</div>
+          <div style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; ${badgeStyle}">${log.status}</div>
+        </div>
+        <div style="font-size:11px; color:var(--text3);">${log.timestamp} • ${log.message}</div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// Intercept tab switching to render toll logs if needed
+const _origShowScreenToll = window.showScreen;
+window.showScreen = function(name) {
+  if (typeof _origShowScreenToll === 'function') _origShowScreenToll(name);
+  if (name === 'toll-settings') {
+    renderTollLogs();
+  }
+};
 
 // Run on initial load
 document.addEventListener('DOMContentLoaded', () => {
