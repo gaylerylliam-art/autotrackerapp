@@ -1,0 +1,3228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AutoTrack — Vehicle Expense Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #0B0F1A;
+  --bg2: #111520;
+  --bg3: #181E2E;
+  --bg4: #1F2740;
+  --card: #161B2C;
+  --card2: #1A2035;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #F0F2FA;
+  --text2: #9BA3C0;
+  --text3: #8E97B4;
+  --accent: #4F6EF7;
+  --accent2: #6B84FF;
+  --accent-glow: rgba(79,110,247,0.3);
+  --green: #1EC46E;
+  --green-bg: rgba(30,196,110,0.1);
+  --red: #F04E5E;
+  --red-bg: rgba(240,78,94,0.1);
+  --amber: #F0A832;
+  --amber-bg: rgba(240,168,50,0.1);
+  --purple: #A855F7;
+  --purple-bg: rgba(168,85,247,0.1);
+  --teal: #22D4D4;
+  --teal-bg: rgba(34,212,212,0.1);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font: 'IBM Plex Sans', sans-serif;
+  --font-display: 'Inter', sans-serif;
+  --font-num: 'Inter', sans-serif;
+  --tnum: "tnum", "ss01";
+  --card-gradient:
+    var(--card-gradient);
+  --card-gradient-raised:
+    linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(180deg, #1F2435 0%, #181D2A 100%);
+  --card-border: 0.5px solid rgba(255,255,255,0.085);
+  --card-border-accent: 0.5px solid rgba(108,124,255,0.18);
+  --inner-glow: inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 0 0.5px rgba(255,255,255,0.04);
+  --nav-h: 72px;
+  --topbar-h: 64px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+/* ── GLOBAL TABULAR NUMS ── */
+.kpi-value,.kpi-trend,.exp-amount,.rs-value,.vc-stat-val,.spark-val,
+.maint-status,.maint-footer span,.alert-badge,.amount-input { 
+  font-variant-numeric: tabular-nums; font-feature-settings: "tnum","cv01"; 
+}
+
+/* ── STAGGERED CARD ENTER ANIMATION ── */
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.kpi-card, .card, .card-sm, .alert-card, .maint-card,
+.vehicle-card, .report-stat, .sparkline-wrap {
+  animation: cardIn 0.38s cubic-bezier(0.22,1,0.36,1) both;
+}
+.kpi-card:nth-child(1),.card:nth-child(1),.alert-card:nth-child(1),.maint-card:nth-child(1),.report-stat:nth-child(1),.vehicle-card:nth-child(1) { animation-delay: 0.04s; }
+.kpi-card:nth-child(2),.card:nth-child(2),.alert-card:nth-child(2),.maint-card:nth-child(2),.report-stat:nth-child(2),.vehicle-card:nth-child(2) { animation-delay: 0.09s; }
+.kpi-card:nth-child(3),.card:nth-child(3),.alert-card:nth-child(3),.maint-card:nth-child(3),.report-stat:nth-child(3) { animation-delay: 0.14s; }
+.kpi-card:nth-child(4),.card:nth-child(4),.alert-card:nth-child(4),.maint-card:nth-child(4),.report-stat:nth-child(4) { animation-delay: 0.19s; }
+.maint-card:nth-child(5) { animation-delay: 0.24s; }
+.sparkline-wrap:nth-child(1) { animation-delay: 0.05s; }
+.sparkline-wrap:nth-child(2) { animation-delay: 0.10s; }
+.sparkline-wrap:nth-child(3) { animation-delay: 0.15s; }
+.sparkline-wrap:nth-child(4) { animation-delay: 0.20s; }
+.sparkline-wrap:nth-child(5) { animation-delay: 0.25s; }
+
+/* ── HOVER & PRESS STATES ── */
+.kpi-card {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), border-color 0.22s, background 0.22s, box-shadow 0.22s;
+  will-change: transform;
+}
+.kpi-card:hover  { transform: translateY(-3px); border-color: rgba(108,124,255,0.3); background: var(--card-gradient-raised); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.38), 0 0 0 1px rgba(108,124,255,0.12), 0 0 20px rgba(108,124,255,0.07); }
+.kpi-card:active { transform: scale(0.97); background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%), linear-gradient(180deg, #171B27 0%, #111520 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.2); }
+
+.card { transition: border-color 0.22s, box-shadow 0.22s; }
+.card:hover { border-color: rgba(108,124,255,0.2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(108,124,255,0.07), 0 0 14px rgba(108,124,255,0.05); }
+
+.vehicle-card {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), border-color 0.22s, box-shadow 0.22s;
+  will-change: transform;
+}
+.vehicle-card:hover  { transform: translateY(-4px); border-color: rgba(108,124,255,0.25); box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,124,255,0.1), 0 0 28px rgba(108,124,255,0.08); }
+.vehicle-card:active { transform: scale(0.985); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 6px rgba(0,0,0,0.22); }
+
+.maint-card {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), border-color 0.22s, box-shadow 0.22s;
+  will-change: transform;
+}
+.maint-card:hover  { transform: translateY(-3px); border-color: rgba(108,124,255,0.2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 8px 24px rgba(0,0,0,0.36), 0 0 0 1px rgba(108,124,255,0.08), 0 0 16px rgba(108,124,255,0.06); }
+.maint-card:active { transform: scale(0.98); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.18); }
+
+.report-stat {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), border-color 0.22s, background 0.22s, box-shadow 0.22s;
+  will-change: transform;
+}
+.report-stat:hover  { transform: translateY(-3px); border-color: rgba(108,124,255,0.25); background: var(--card-gradient-raised); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 22px rgba(0,0,0,0.36), 0 0 0 1px rgba(108,124,255,0.1), 0 0 18px rgba(108,124,255,0.07); }
+.report-stat:active { transform: scale(0.97); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.2); }
+
+.expense-row {
+  transition: background 0.12s;
+}
+.expense-row:hover  { background: rgba(255,255,255,0.03); }
+.expense-row:active { background: rgba(255,255,255,0.05); }
+
+.alert-card {
+  transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), opacity 0.15s;
+}
+.alert-card:hover  { transform: translateX(3px); }
+.alert-card:active { opacity: 0.7; transform: translateX(1px); }
+
+.vehicle-chip {
+  transition: transform 0.15s cubic-bezier(0.22,1,0.36,1), background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  will-change: transform;
+}
+.vehicle-chip:hover:not(.active)  { background: var(--bg4); border-color: var(--border2); transform: translateY(-1px); }
+.vehicle-chip:active { transform: scale(0.95); }
+.vehicle-chip.active { box-shadow: 0 4px 16px rgba(108,124,255,0.4), 0 0 0 1px rgba(108,124,255,0.2); }
+
+.settings-row { transition: background 0.12s; }
+.settings-row:hover  { background: rgba(255,255,255,0.025); }
+.settings-row:active { background: rgba(255,255,255,0.05); }
+
+.cat-item { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), border-color 0.2s, background 0.18s, box-shadow 0.2s; }
+.cat-item:hover:not(.selected) { background: var(--bg4); border-color: rgba(108,124,255,0.25); transform: scale(1.05) translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.cat-item:active { transform: scale(0.96); }
+
+html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: var(--font); color: var(--text); }
+
+.app-shell {
+  width: 100%; height: 100vh; max-width: 430px; margin: 0 auto;
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(108,124,255,0.08), transparent 40%),
+    #0B0F1A;
+  display: flex; flex-direction: column;
+  box-shadow: 0 0 80px rgba(0,0,0,0.5);
+}
+
+.screen {
+  display: none; flex-direction: column; flex: 1; overflow: hidden;
+  animation: fadeIn 0.25s ease;
+}
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+.scroll-content {
+  flex: 1; overflow-y: auto; padding-bottom: calc(var(--nav-h) + 24px);
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* TOP BAR */
+.topbar {
+  height: var(--topbar-h); display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; flex-shrink: 0; background: transparent;
+  border-bottom: 0.5px solid var(--border);
+}
+.topbar-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); }
+.topbar-sub { font-size: 12px; color: var(--text2); margin-top: 0; }
+.topbar-action {
+  width: 38px; height: 38px; border-radius: 50%; border: 0.5px solid var(--border2);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.16s cubic-bezier(0.22,1,0.36,1), box-shadow 0.18s;
+}
+.topbar-action:hover { background: var(--bg3); box-shadow: 0 0 0 1px rgba(108,124,255,0.2); transform: scale(1.06); }
+.topbar-action:active { background: var(--bg4); transform: scale(0.93); box-shadow: none; }
+.topbar-action svg { width: 18px; height: 18px; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  height: var(--nav-h); display: flex; align-items: center;
+  background:
+    linear-gradient(180deg, #161B28 0%, #111520 100%);
+  border-top: 0.5px solid rgba(255,255,255,0.1);
+  padding: 0 8px; flex-shrink: 0; position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 8px 4px; cursor: pointer; border-radius: var(--radius-xs);
+  transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), opacity 0.15s;
+  position: relative;
+}
+.nav-icon {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+}
+.nav-icon svg { width: 22px; height: 22px; }
+.nav-label { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.15s; letter-spacing: 0.06em; }
+.nav-item:active { transform: scale(0.90); }
+.nav-item.active .nav-label { color: var(--accent2); }
+.nav-item.active .nav-icon svg { stroke: var(--accent2); }
+.nav-dot {
+  width: 16px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, #6C7CFF, #7B5EFF);
+  box-shadow: 0 0 6px rgba(108,124,255,0.6);
+  position: absolute; bottom: 4px;
+}
+
+/* FAB */
+.fab {
+  position: absolute; bottom: calc(var(--nav-h) + 36px); right: 20px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, #6C7CFF, #7B5EFF);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.15s, box-shadow 0.15s; z-index: 100;
+  border: 0.5px solid rgba(108,124,255,0.4);
+}
+.fab:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--accent-glow); }
+.fab:active { transform: scale(0.93); box-shadow: 0 3px 10px var(--accent-glow); }
+.fab svg { width: 20px; height: 20px; stroke: white; stroke-width: 2.5; }
+
+/* ── ELEVATION / DEPTH SYSTEM ──
+   Level 0 = page bg
+   Level 1 = card   (kpi-card, alert-card, report-stat)  — faintest shadow
+   Level 2 = card   (main .card, maint-card)              — medium shadow
+   Level 3 = vehicle-card                                  — strongest shadow
+   Every card gets:
+     • A 1px top-edge highlight via inset box-shadow  → simulates light source
+     • A tiered drop-shadow                           → elevation
+     • A diagonal gradient tint                       → subtle variation across flat surface
+*/
+
+/* Noise texture: tiny SVG data-uri overlaid at low opacity */
+:root {
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* CARDS — level 2 */
+.card {
+  background:
+    var(--card-gradient);
+  border: var(--card-border);
+  border-radius: var(--radius); padding: 16px 18px; margin: 0 16px 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 2px 8px rgba(0,0,0,0.28),
+    0 1px 2px rgba(0,0,0,0.18);
+  position: relative; overflow: hidden;
+}
+.card::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.025;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+.card-sm {
+  background:
+    var(--card-gradient);
+  border: var(--card-border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 1px 4px rgba(0,0,0,0.22);
+  position: relative; overflow: hidden;
+}
+.card-sm::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.025;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+
+/* QUICK ACTION CARDS */
+.quick-action {
+  transition:
+    transform 0.22s cubic-bezier(0.22,1,0.36,1),
+    border-color 0.22s,
+    box-shadow 0.22s;
+  will-change: transform;
+}
+.quick-action:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(108,124,255,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 0 0 0.5px rgba(255,255,255,0.05),
+    0 8px 22px rgba(0,0,0,0.32),
+    0 0 0 1px rgba(108,124,255,0.1),
+    0 0 18px rgba(108,124,255,0.08);
+}
+.quick-action:active {
+  transform: scale(0.97);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; margin-bottom: 12px; }
+.kpi-card {
+  background:
+    var(--card-gradient);
+  border: var(--card-border);
+  border-radius: var(--radius-sm); padding: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 1px 3px rgba(0,0,0,0.22);
+  position: relative; overflow: hidden;
+}
+.kpi-card::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.03;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+.kpi-label { font-size: 10px; color: var(--text3); font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; margin-bottom: 10px; }
+.kpi-value { font-family: var(--font-num); font-size: 27px; font-weight: 600; color: var(--text); line-height: 1; letter-spacing: -0.4px; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+.kpi-sub { font-size: 11px; color: var(--text2); font-weight: 400; margin-top: 5px; }
+.kpi-trend { font-size: 11px; font-weight: 500; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.kpi-trend.up { color: var(--green); }
+.kpi-trend.down { color: var(--red); }
+
+/* SECTION HEADER */
+.sec-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 20px 10px; flex-shrink: 0;
+}
+.sec-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.sec-link { font-size: 13px; color: var(--accent2); cursor: pointer; }
+
+/* VEHICLE SELECTOR */
+.vehicle-selector {
+  display: flex; gap: 10px; padding: 12px 16px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.vehicle-selector::-webkit-scrollbar { display: none; }
+.vehicle-chip {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 100px; border: 1px solid rgba(255,255,255,0.18); background: var(--card2);
+  white-space: nowrap; cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.vehicle-chip.active { background: var(--accent); border-color: var(--accent); }
+.vehicle-chip-icon { font-size: 16px; }
+.vehicle-chip-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.vehicle-chip.active .vehicle-chip-name { color: white; }
+.vehicle-chip-plate {
+  font-size: 10px; background: rgba(255,255,255,0.12); padding: 2px 6px;
+  border-radius: 4px; color: var(--text2); letter-spacing: 0.4px;
+}
+.vehicle-chip.active .vehicle-chip-plate { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); }
+
+/* ALERT CARDS */
+.alert-card {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background:
+    var(--card-gradient);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid; border-top: var(--card-border); border-right: var(--card-border); border-bottom: var(--card-border); margin: 0 16px 8px; cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 1px 4px rgba(0,0,0,0.2);
+  transition: opacity 0.15s;
+  position: relative; overflow: hidden;
+}
+.alert-card::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.025;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+.alert-card:active { opacity: 0.7; }
+.alert-card.warn { border-color: var(--amber); }
+.alert-card.danger { border-color: var(--red); }
+.alert-card.info { border-color: var(--accent); }
+.alert-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.alert-card.warn .alert-icon { background: var(--amber-bg); }
+.alert-card.danger .alert-icon { background: var(--red-bg); }
+.alert-card.info .alert-icon { background: rgba(79,110,247,0.1); }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.alert-sub { font-size: 11px; font-weight: 400; color: var(--text2); margin-top: 3px; }
+.alert-badge {
+  margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 8px;
+  border-radius: 100px; flex-shrink: 0;
+}
+.alert-card.warn .alert-badge { background: var(--amber-bg); color: var(--amber); }
+.alert-card.danger .alert-badge { background: var(--red-bg); color: var(--red); }
+
+/* EXPENSE ROW */
+.expense-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s;
+}
+.expense-row:last-child { border-bottom: none; }
+.expense-row:active { background: rgba(255,255,255,0.02); }
+.exp-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.exp-info { flex: 1; min-width: 0; }
+.exp-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.exp-meta { font-size: 11px; font-weight: 400; color: var(--text2); margin-top: 3px; }
+.exp-amount { font-size: 16px; font-weight: 700; font-family: var(--font-num); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+.exp-amount.neg { color: var(--red); }
+.exp-amount.pos { color: var(--green); }
+
+/* PILL TABS */
+.pill-tabs { display: flex; gap: 6px; padding: 0 16px 14px; overflow-x: auto; }
+.pill-tabs::-webkit-scrollbar { display: none; }
+.pill {
+  padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border2); color: var(--text2); cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.22s cubic-bezier(0.22,1,0.36,1),
+              border-color 0.22s cubic-bezier(0.22,1,0.36,1),
+              color 0.18s ease,
+              transform 0.16s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.22s ease;
+}
+.pill:hover:not(.active) { border-color: rgba(108,124,255,0.35); color: var(--text); transform: translateY(-1px); }
+.pill:active { transform: scale(0.95); }
+.pill.active {
+  background: linear-gradient(135deg, #6C7CFF, var(--accent));
+  border-color: transparent; color: white;
+  box-shadow: 0 2px 12px rgba(108,124,255,0.35);
+  transform: translateY(-1px);
+}
+
+/* MAINTENANCE CARD */
+.maint-card {
+  margin: 0 16px 10px;
+  background:
+    var(--card-gradient);
+  border: var(--card-border);
+  border-radius: var(--radius); padding: 14px 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 2px 8px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15);
+  position: relative; overflow: hidden;
+}
+.maint-card::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.025;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+.maint-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.maint-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.maint-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.maint-due { font-size: 11px; font-weight: 400; color: var(--text2); margin-top: 3px; }
+.maint-status {
+  margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 9px;
+  border-radius: 100px;
+}
+.maint-status.overdue { background: var(--red-bg); color: var(--red); }
+.maint-status.soon { background: var(--amber-bg); color: var(--amber); }
+.maint-status.ok { background: var(--green-bg); color: var(--green); }
+.maint-progress { height: 4px; background: var(--bg4); border-radius: 100px; overflow: hidden; }
+.maint-progress-bar { height: 100%; border-radius: 100px; transition: width 1s ease; }
+.maint-progress-bar.red { background: var(--red); }
+.maint-progress-bar.amber { background: var(--amber); }
+.maint-progress-bar.green { background: var(--green); }
+.maint-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text2); letter-spacing: 0.01em; }
+
+/* ADD EXPENSE MODAL */
+.modal-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: flex-end; z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  width: 100%; background: var(--bg2); border-radius: 24px 24px 0 0;
+  padding: 0 0 32px; max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.modal-sheet::-webkit-scrollbar { display: none; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--bg4); border-radius: 2px; margin: 12px auto 4px; }
+.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; padding: 12px 20px 16px; color: var(--text); }
+
+/* FORM */
+.form-group { padding: 0 20px 16px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+.amount-input-wrap { display: flex; align-items: center; background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 16px; }
+.currency-prefix { font-size: 24px; font-weight: 300; color: var(--text3); margin-right: 4px; }
+.amount-input {
+  flex: 1; background: none; border: none; outline: none; font-family: var(--font-display);
+  font-size: 36px; font-weight: 700; color: var(--text); padding: 12px 0; width: 100%;
+}
+.amount-input::placeholder { color: var(--text3); }
+.text-input {
+  width: 100%; background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  padding: 12px 14px; font-size: 15px; color: var(--text); font-family: var(--font); outline: none;
+  transition: border-color 0.15s;
+}
+.text-input:focus { border-color: var(--accent); }
+
+/* CATEGORY GRID */
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 20px 16px; }
+.cat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+  cursor: pointer; transition: all 0.15s; background: var(--card);
+}
+.cat-item.selected { border-color: var(--accent); background: rgba(79,110,247,0.1); }
+.cat-item-icon { font-size: 22px; }
+.cat-item-label { font-size: 10px; font-weight: 500; color: var(--text3); text-align: center; }
+.cat-item.selected .cat-item-label { color: var(--accent2); }
+
+/* SUBMIT BTN */
+.submit-btn {
+  margin: 0 20px; width: calc(100% - 40px); padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent), #7B5EFF);
+  border: none; border-radius: 100px; font-size: 15px; font-weight: 600;
+  color: white; font-family: var(--font); cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(79,110,247,0.35);
+}
+.submit-btn:hover { box-shadow: 0 6px 22px rgba(79,110,247,0.5); transform: translateY(-1px); }
+.submit-btn:active { opacity: 0.95; transform: scale(0.97); box-shadow: 0 2px 8px rgba(79,110,247,0.25); }
+.submit-btn:focus-visible { outline: 2px solid rgba(108,124,255,0.6); outline-offset: 3px; }
+
+/* CHART CONTAINER */
+.chart-wrap { padding: 0 16px 28px; }
+.chart-inner { position: relative; width: 100%; height: 180px; }
+
+/* REPORTS STATS */
+.report-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 12px; }
+.report-stat {
+  background:
+    var(--card-gradient);
+  border-radius: var(--radius-sm); padding: 12px;
+  border: var(--card-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 1px 4px rgba(0,0,0,0.22);
+  position: relative; overflow: hidden;
+}
+.report-stat::after {
+  content:''; pointer-events:none;
+  position:absolute; inset:0; border-radius: inherit; opacity:0.025;
+  background-image: var(--noise); background-size: 160px 160px;
+}
+.rs-label { font-size: 10px; font-weight: 400; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; }
+.rs-value { font-size: 21px; font-weight: 600; font-family: var(--font-num); color: var(--text); letter-spacing: -0.4px; line-height: 1; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+.rs-sub { font-size: 11px; font-weight: 400; color: var(--text2); margin-top: 4px; }
+
+/* VEHICLE CARD */
+.vehicle-card {
+  margin: 0 16px 12px; 
+  background:
+    var(--card-gradient);
+  border: var(--card-border); border-radius: var(--radius);
+  overflow: hidden; cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 4px 16px rgba(0,0,0,0.36),
+    0 2px 4px rgba(0,0,0,0.22),
+    0 1px 1px rgba(0,0,0,0.14);
+}
+.vehicle-card-header {
+  height: 110px;
+  background: linear-gradient(135deg, #1A2246, #252D4A);
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+}
+.vehicle-car-emoji { font-size: 56px; }
+.vehicle-card-body { padding: 14px 16px; }
+.vc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.vc-name { font-size: 16px; font-weight: 700; font-family: var(--font-display); color: var(--text); }
+.vc-year { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.vc-plate { font-size: 12px; font-weight: 700; background: var(--bg4); padding: 4px 10px; border-radius: 6px; color: var(--text2); letter-spacing: 1px; }
+.vc-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.vc-stat { background: var(--bg3); border-radius: 8px; padding: 8px; text-align: center; }
+.vc-stat-val { font-size: 15px; font-weight: 600; font-family: var(--font-num); color: var(--text); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+.vc-stat-label { font-size: 9px; font-weight: 400; color: var(--text3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; }
+
+/* SETTINGS */
+.settings-row {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s;
+}
+.settings-row:active { background: rgba(255,255,255,0.02); }
+.settings-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.settings-label { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+.settings-arrow { color: var(--text3); font-size: 18px; }
+.settings-badge { font-size: 11px; padding: 3px 8px; border-radius: 100px; font-weight: 600; }
+
+/* TOAST */
+.toast {
+  position: absolute; bottom: calc(var(--nav-h) + 24px); left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--green); color: white; padding: 10px 20px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; z-index: 300; white-space: nowrap;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 4px 20px rgba(34,214,123,0.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* PROFILE HEADER */
+.profile-header {
+  display: flex; flex-direction: column; align-items: center; padding: 24px 20px 16px;
+}
+.avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #7B5EFF);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: white; margin-bottom: 12px;
+}
+.profile-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); }
+.profile-plan {
+  font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 100px;
+  background: linear-gradient(135deg, rgba(79,110,247,0.2), rgba(123,94,255,0.2));
+  border: 1px solid rgba(79,110,247,0.4); color: var(--accent2); margin-top: 6px;
+}
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 40px 30px; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.empty-sub { font-size: 14px; color: var(--text3); line-height: 1.6; }
+
+/* DIVIDER */
+.divider { height: 0.5px; background: var(--border); margin: 4px 0; }
+
+/* SWITCH */
+.switch-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.switch { width: 44px; height: 26px; background: var(--bg4); border-radius: 100px; position: relative; cursor: pointer; transition: background 0.2s; }
+.switch.on { background: var(--accent); }
+.switch-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.switch.on .switch-thumb { left: 21px; }
+
+/* RECEIPT SCREEN OCR STEPS */
+.rocr-step { display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);transition:color 0.2s; }
+.rocr-step.done   { color:var(--green); }
+.rocr-step.active { color:var(--text); }
+.rocr-dot { width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s; }
+.rocr-step.done  .rocr-dot { border-color:var(--green);background:var(--green-bg); }
+.rocr-step.active .rocr-dot { border-color:#6C7CFF;background:rgba(108,124,255,0.15);animation:rPulse 1s infinite; }
+.rocr-dot-in { width:6px;height:6px;border-radius:50%; }
+.rocr-step.done  .rocr-dot-in { background:var(--green); }
+.rocr-step.active .rocr-dot-in { background:#6C7CFF; }
+@keyframes rPulse { 0%,100%{box-shadow:0 0 0 0 rgba(108,124,255,0.4)} 50%{box-shadow:0 0 0 5px rgba(108,124,255,0)} }
+@keyframes rShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+[style*="rShimmer"] { background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%; }
+.rdot { height:3px;border-radius:2px;transition:all 0.3s cubic-bezier(0.22,1,0.36,1); }
+
+/* SPARKLINE */
+.sparkline-wrap { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+.spark-label { font-size: 12px; font-weight: 400; color: var(--text3); width: 70px; flex-shrink: 0; }
+.spark-bar-wrap { flex: 1; height: 8px; background: var(--bg4); border-radius: 100px; overflow: hidden; }
+.spark-bar { height: 100%; border-radius: 100px; }
+.spark-val { font-size: 14px; font-weight: 700; font-family: var(--font-num); color: var(--text); width: 70px; text-align: right; flex-shrink: 0; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+
+/* ── LEGAL SCREENS ── */
+.legal-topbar {
+  height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;flex-shrink:0;background:transparent;
+  border-bottom:0.5px solid rgba(255,255,255,0.07);
+}
+.legal-scroll { flex:1;overflow-y:auto;padding-bottom:100px;-webkit-overflow-scrolling:touch; }
+.legal-scroll::-webkit-scrollbar { display:none; }
+.legal-hero {
+  padding:24px 20px 20px;
+  background:linear-gradient(180deg,rgba(108,124,255,0.06) 0%,transparent 100%);
+  border-bottom:0.5px solid rgba(255,255,255,0.06);
+  margin-bottom:6px;
+}
+.legal-hero-icon {
+  width:52px;height:52px;border-radius:16px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.legal-hero-title {
+  font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--text);
+  letter-spacing:-0.4px;margin-bottom:6px;
+}
+.legal-hero-meta { font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px; }
+.legal-section { padding:20px 20px 0; }
+.legal-section-title {
+  font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.02em;
+  text-transform:uppercase;margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.legal-section-title .lsi { font-size:16px; }
+.legal-p { font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:10px; }
+.legal-ul { list-style:none;padding:0;margin:0 0 12px; }
+.legal-ul li {
+  font-size:13px;color:var(--text2);line-height:1.7;padding:4px 0 4px 18px;position:relative;
+}
+.legal-ul li::before {
+  content:"";position:absolute;left:4px;top:12px;
+  width:5px;height:5px;border-radius:50%;background:var(--accent2);opacity:0.6;
+}
+.legal-divider { height:0.5px;background:rgba(255,255,255,0.06);margin:20px 0; }
+.legal-highlight {
+  background:linear-gradient(135deg,rgba(108,124,255,0.07),rgba(168,85,247,0.04));
+  border:0.5px solid rgba(108,124,255,0.2);border-radius:var(--radius-sm);
+  padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start;
+}
+.legal-highlight-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+.legal-highlight-text { font-size:12px;color:var(--text2);line-height:1.7; }
+.legal-highlight-text strong { color:var(--accent2);font-weight:600; }
+.trust-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 4px; }
+.trust-card {
+  background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)),
+             linear-gradient(180deg,#1B1F2A,#141824);
+  border:0.5px solid rgba(255,255,255,0.085);border-radius:var(--radius-sm);
+  padding:14px;text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06),0 2px 8px rgba(0,0,0,0.2);
+}
+.trust-card-icon { font-size:24px;margin-bottom:8px; }
+.trust-card-title { font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px; }
+.trust-card-sub { font-size:11px;color:var(--text3);line-height:1.5; }
+.legal-bottom-actions { padding:20px 20px 0;display:flex;flex-direction:column;gap:10px; }
+.legal-action-btn {
+  width:100%;padding:14px;border:none;border-radius:var(--radius-sm);cursor:pointer;
+  font-size:14px;font-weight:600;font-family:var(--font);
+  transition:transform 0.18s cubic-bezier(0.22,1,0.36,1),box-shadow 0.18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.legal-action-btn.primary {
+  background:linear-gradient(135deg,#6C7CFF,#7B5EFF);color:white;
+  box-shadow:0 4px 16px rgba(108,124,255,0.38),inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.legal-action-btn.primary:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,124,255,0.5); }
+.legal-action-btn.secondary {
+  background:var(--card2);color:var(--text2);border:0.5px solid var(--border2);
+}
+.legal-action-btn.danger {
+  background:var(--red-bg);color:var(--red);border:0.5px solid rgba(240,78,94,0.25);
+}
+.legal-action-btn:active { transform:scale(0.97); }
+.data-toggle-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);
+}
+.data-toggle-row:last-child { border-bottom:none; }
+.data-toggle-info { flex:1;margin-right:16px; }
+.data-toggle-label { font-size:14px;font-weight:500;color:var(--text); }
+.data-toggle-sub { font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5; }
+/* Delete modal */
+.delete-modal-overlay {
+  position:absolute;inset:0;background:rgba(0,0,0,0.75);
+  display:none;align-items:flex-end;z-index:300;
+}
+.delete-modal-overlay.open { display:flex; }
+.delete-modal-sheet {
+  width:100%;background:var(--bg2);border-radius:24px 24px 0 0;
+  padding:0 20px 36px;
+  animation:slideUpModal 0.32s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes slideUpModal { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-icon-anim {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- =================== HOME SCREEN =================== -->
+  <div class="screen active" id="screen-home">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title"><span style="font-weight:400;color:var(--text2)">Good morning,</span> <span style="font-weight:700;color:var(--text)">Tarik Niche</span> 👋</div>
+        <div class="topbar-sub" style="margin-top:0px">Friday, March 20, 2026</div>
+      </div>
+      <div class="topbar-action" onclick="showToast('Notifications')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="scroll-content">
+      <!-- Vehicle Selector -->
+      <div class="vehicle-selector">
+        <div class="vehicle-chip active">
+          <span class="vehicle-chip-icon">🚗</span>
+          <span class="vehicle-chip-name">BMW X5</span>
+          <span class="vehicle-chip-plate">DXB•A1234</span>
+        </div>
+        <div class="vehicle-chip">
+          <span class="vehicle-chip-icon">🚙</span>
+          <span class="vehicle-chip-name">Toyota LC</span>
+          <span class="vehicle-chip-plate">DXB•B5678</span>
+        </div>
+        <div class="vehicle-chip" onclick="showAddVehicle()">
+          <span style="font-size:18px; color:var(--accent2)">＋</span>
+          <span class="vehicle-chip-name" style="color:var(--accent2)">Add</span>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">This Month</div>
+          <div class="kpi-value">AED 2.8k</div>
+          <div class="kpi-trend up">↑ 12% vs last</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cost / km</div>
+          <div class="kpi-value">AED 0.94</div>
+          <div class="kpi-trend down">↓ 5% improved</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Odometer</div>
+          <div class="kpi-value">87,420</div>
+          <div class="kpi-sub">km recorded</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">YTD Total</div>
+          <div class="kpi-value">AED 18.2k</div>
+          <div class="kpi-sub">Jan – Mar 2026</div>
+        </div>
+      </div>
+
+      <!-- Spending Chart -->
+      <div class="sec-header" style="padding-top:44px"><div class="sec-title">Spending Trend</div><div class="sec-link">6 months</div></div>
+      <div class="chart-wrap">
+        <div class="chart-inner"><canvas id="spendChart"></canvas></div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="sec-header"><div class="sec-title">Alerts</div><div class="sec-link" onclick="showScreen('maintenance')">See all</div></div>
+      <div class="alert-card danger" onclick="showScreen('maintenance')">
+        <div class="alert-icon">⚙️</div>
+        <div>
+          <div class="alert-title">Oil Change Overdue</div>
+          <div class="alert-sub">BMW X5 · 850 km overdue</div>
+        </div>
+        <div class="alert-badge">Overdue</div>
+      </div>
+      <div class="alert-card warn" onclick="showScreen('maintenance')">
+        <div class="alert-icon">🛡️</div>
+        <div>
+          <div class="alert-title">Insurance Expires Soon</div>
+          <div class="alert-sub">BMW X5 · 18 days remaining</div>
+        </div>
+        <div class="alert-badge">18 days</div>
+      </div>
+      <div class="alert-card info" onclick="showScreen('maintenance')">
+        <div class="alert-icon">🚗</div>
+        <div>
+          <div class="alert-title">Registration Due</div>
+          <div class="alert-sub">Toyota LC · 45 days remaining</div>
+        </div>
+      </div>
+
+      <!-- Recent Expenses -->
+      <div class="sec-header"><div class="sec-title">Recent Expenses</div><div class="sec-link" onclick="showScreen('expenses')">View all</div></div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(255,184,63,0.12)">⛽</div>
+          <div class="exp-info"><div class="exp-name">ADNOC Station</div><div class="exp-meta">Fuel · Today</div></div>
+          <div class="exp-amount neg">−AED 180</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🔧</div>
+          <div class="exp-info"><div class="exp-name">Al Futtaim Auto</div><div class="exp-meta">Maintenance · Yesterday</div></div>
+          <div class="exp-amount neg">−AED 450</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(34,212,212,0.12)">🛣️</div>
+          <div class="exp-info"><div class="exp-name">Salik Toll</div><div class="exp-meta">Toll · Mar 18</div></div>
+          <div class="exp-amount neg">−AED 16</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(168,85,247,0.12)">🧼</div>
+          <div class="exp-info"><div class="exp-name">Premium Car Wash</div><div class="exp-meta">Car Wash · Mar 16</div></div>
+          <div class="exp-amount neg">−AED 60</div>
+        </div>
+      </div>
+
+      <!-- Category Breakdown Sparklines -->
+      <div class="sec-header"><div class="sec-title">By Category</div><div class="sec-link" style="color:var(--text3);font-size:11px;cursor:default">AED · this month</div></div>
+      <div class="card" style="padding:12px 4px;">
+        <div class="sparkline-wrap">
+          <div class="spark-label">⛽ Fuel</div>
+          <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:72%;background:var(--amber)"></div></div>
+          <div class="spark-val">1.2k</div>
+        </div>
+        <div class="sparkline-wrap">
+          <div class="spark-label">🔧 Maintenance</div>
+          <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:45%;background:var(--accent)"></div></div>
+          <div class="spark-val">760</div>
+        </div>
+        <div class="sparkline-wrap">
+          <div class="spark-label">🛡️ Insurance</div>
+          <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:28%;background:var(--purple)"></div></div>
+          <div class="spark-val">480</div>
+        </div>
+        <div class="sparkline-wrap">
+          <div class="spark-label">🛣️ Toll</div>
+          <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:14%;background:var(--teal)"></div></div>
+          <div class="spark-val">240</div>
+        </div>
+        <div class="sparkline-wrap">
+          <div class="spark-label">🧼 Other</div>
+          <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:8%;background:var(--text3)"></div></div>
+          <div class="spark-val">127</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="sec-header"><div class="sec-title">Quick Actions</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 10px;">
+        <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="openAddExpense()">
+          <div style="font-size:26px;margin-bottom:8px;">➕</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Add Expense</div>
+        </div>
+        <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('reports')">
+          <div style="font-size:26px;margin-bottom:8px;">📊</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">View Reports</div>
+        </div>
+        <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('maintenance')">
+          <div style="font-size:26px;margin-bottom:8px;">🔔</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Reminders</div>
+        </div>
+        <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('documents')">
+          <div style="font-size:26px;margin-bottom:8px;">📁</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Document Vault</div>
+        </div>
+      </div>
+
+      <!-- Receipt Upload — full-width featured card -->
+      <div onclick="showScreen('receipt')" style="margin:0 16px 20px;cursor:pointer;
+        border-radius:var(--radius);overflow:hidden;position:relative;
+        background:linear-gradient(135deg,rgba(108,124,255,0.14) 0%,rgba(123,94,255,0.08) 50%,rgba(168,85,247,0.06) 100%),
+                   linear-gradient(180deg,#1B1F2A 0%,#141824 100%);
+        border:0.5px solid rgba(108,124,255,0.28);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 4px 18px rgba(0,0,0,0.28),0 0 24px rgba(108,124,255,0.07);
+        transition:transform 0.22s cubic-bezier(0.22,1,0.36,1),box-shadow 0.22s,border-color 0.22s;">
+        <!-- glow orb -->
+        <div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;
+                    background:radial-gradient(circle,rgba(108,124,255,0.18),transparent 70%);
+                    pointer-events:none;"></div>
+        <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;">
+          <div style="width:48px;height:48px;border-radius:14px;flex-shrink:0;
+                      background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
+                      border:0.5px solid rgba(108,124,255,0.3);
+                      display:flex;align-items:center;justify-content:center;font-size:22px;">🧾</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+              <div style="font-size:14px;font-weight:700;color:var(--text);font-family:var(--font-display)">Upload Receipt</div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.08em;padding:2px 7px;border-radius:100px;
+                          background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
+                          border:0.5px solid rgba(108,124,255,0.3);color:var(--accent2);">✦ AI OCR</div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.4;">Auto-extract supplier, amount, date &amp; VAT from any receipt</div>
+          </div>
+          <div style="color:var(--accent2);flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+        <div style="height:0.5px;background:rgba(108,124,255,0.15);margin:0 18px;"></div>
+        <div style="padding:10px 18px;display:flex;gap:14px;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+            <span style="color:#25D366;font-size:13px;">●</span> WhatsApp
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+            <span style="color:var(--accent2);font-size:13px;">●</span> Camera
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+            <span style="color:var(--amber);font-size:13px;">●</span> Files / PDF
+          </div>
+          <div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);">JPG · PNG · PDF</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== RECEIPT UPLOAD SCREEN =================== -->
+  <div class="screen" id="screen-receipt">
+    <div class="topbar">
+      <div class="topbar-action" onclick="receiptBack()" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div><div class="topbar-title">Upload Receipt</div></div>
+      <div style="font-size:11px;font-weight:500;color:var(--text3);background:var(--card2);border:0.5px solid var(--border);padding:4px 10px;border-radius:100px;letter-spacing:0.06em;" id="rStepBadge">Step 1 of 3</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="display:flex;gap:5px;padding:12px 20px 2px;">
+      <div id="rdot1" style="height:3px;border-radius:2px;flex:2;background:linear-gradient(90deg,#6C7CFF,var(--accent));box-shadow:0 0 8px rgba(108,124,255,0.5);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);"></div>
+      <div id="rdot2" style="height:3px;border-radius:2px;flex:1;background:rgba(255,255,255,0.1);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);"></div>
+      <div id="rdot3" style="height:3px;border-radius:2px;flex:1;background:rgba(255,255,255,0.1);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);padding:4px 20px 10px;letter-spacing:0.1em;text-transform:uppercase;" id="rStepLabel">Upload receipt image</div>
+
+    <div class="scroll-content" id="rScroll">
+
+      <!-- ═══ STEP 1: UPLOAD ═══ -->
+      <div id="rstep1">
+        <div id="rUploadZone" onclick="rTriggerUpload()"
+             ondragover="event.preventDefault();this.style.borderColor='rgba(108,124,255,0.7)'"
+             ondragleave="this.style.borderColor='rgba(108,124,255,0.35)'"
+             ondrop="event.preventDefault();this.style.borderColor='rgba(108,124,255,0.35)';rHandleFile({target:{files:event.dataTransfer.files}})"
+             style="margin:0 16px 16px;border-radius:var(--radius);border:1.5px dashed rgba(108,124,255,0.35);
+                    background:linear-gradient(135deg,rgba(108,124,255,0.05),rgba(76,90,230,0.02)),#131828;
+                    padding:28px 20px 22px;text-align:center;cursor:pointer;
+                    transition:border-color 0.2s,transform 0.2s cubic-bezier(0.22,1,0.36,1);">
+          <div style="width:52px;height:52px;border-radius:14px;margin:0 auto 14px;
+                      background:linear-gradient(135deg,rgba(108,124,255,0.2),rgba(76,90,230,0.1));
+                      border:0.5px solid rgba(108,124,255,0.28);
+                      display:flex;align-items:center;justify-content:center;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C7CFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:5px;">Drop your receipt here</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.7;margin-bottom:18px;">AI extracts all details automatically — <br>supplier, date, amount, VAT &amp; more</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <div onclick="event.stopPropagation();rSimulateUpload('whatsapp')"
+                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s cubic-bezier(0.22,1,0.36,1);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              WhatsApp
+            </div>
+            <div onclick="event.stopPropagation();rSimulateUpload('camera')"
+                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s cubic-bezier(0.22,1,0.36,1);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Camera
+            </div>
+            <div onclick="event.stopPropagation();rSimulateUpload('files')"
+                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s cubic-bezier(0.22,1,0.36,1);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Files / PDF
+            </div>
+          </div>
+          <input type="file" id="rFileInput" accept="image/*,.pdf" style="display:none" onchange="rHandleFile(event)">
+        </div>
+
+        <!-- Tip row -->
+        <div style="margin:0 16px 14px;background:var(--card2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:16px;flex-shrink:0;">💡</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.6;">For best results, ensure the receipt is well-lit and the text is clearly visible. AI reads JPG, PNG, PDF and WhatsApp images.</div>
+        </div>
+
+        <!-- Formats -->
+        <div style="display:flex;align-items:center;gap:8px;padding:0 16px;margin-bottom:12px;">
+          <div style="flex:1;height:0.5px;background:rgba(255,255,255,0.06)"></div>
+          <div style="font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;">Supported</div>
+          <div style="flex:1;height:0.5px;background:rgba(255,255,255,0.06)"></div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:7px;padding:0 16px 30px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:var(--text3);background:var(--card2);border:0.5px solid var(--border);padding:4px 10px;border-radius:6px;">JPG · PNG</span>
+          <span style="font-size:11px;color:var(--text3);background:var(--card2);border:0.5px solid var(--border);padding:4px 10px;border-radius:6px;">PDF</span>
+          <span style="font-size:11px;color:var(--text3);background:var(--card2);border:0.5px solid var(--border);padding:4px 10px;border-radius:6px;">WhatsApp</span>
+          <span style="font-size:11px;color:var(--text3);background:var(--card2);border:0.5px solid var(--border);padding:4px 10px;border-radius:6px;">Screenshot</span>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 2: OCR PROCESSING ═══ -->
+      <div id="rstep2" style="display:none">
+        <!-- Receipt preview skeleton -->
+        <div style="margin:0 16px 14px;border-radius:var(--radius);overflow:hidden;border:var(--card-border);
+                    background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)),linear-gradient(180deg,#1B1F2A,#141824);
+                    box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),0 4px 16px rgba(0,0,0,0.3);">
+          <div style="height:130px;background:linear-gradient(135deg,#1a2246,#1e1a36);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;">
+            <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);letter-spacing:0.14em;margin-bottom:6px;">RECEIPT</div>
+            <div style="width:66%;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.04) 75%);background-size:200% 100%;animation:rShimmer 1.4s infinite;"></div>
+            <div style="width:44%;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.04) 75%);background-size:200% 100%;animation:rShimmer 1.4s 0.12s infinite;"></div>
+            <div style="width:56%;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.04) 75%);background-size:200% 100%;animation:rShimmer 1.4s 0.24s infinite;"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);" id="rThumbName">receipt.jpg</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px;">Processing…</div>
+            </div>
+            <div onclick="rGoStep(1)" style="font-size:12px;color:var(--accent2);cursor:pointer;">Change</div>
+          </div>
+        </div>
+
+        <!-- OCR progress card -->
+        <div style="margin:0 16px 14px;border-radius:var(--radius);padding:18px;
+                    background:linear-gradient(135deg,rgba(108,124,255,0.06),rgba(76,90,230,0.03)),linear-gradient(180deg,#1B1F2A,#141824);
+                    border:0.5px solid rgba(108,124,255,0.22);
+                    box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),0 4px 16px rgba(0,0,0,0.26),0 0 20px rgba(108,124,255,0.05);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:40px;height:40px;border-radius:12px;flex-shrink:0;
+                        background:linear-gradient(135deg,rgba(108,124,255,0.22),rgba(76,90,230,0.12));
+                        border:0.5px solid rgba(108,124,255,0.28);
+                        display:flex;align-items:center;justify-content:center;font-size:19px;">🔍</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text);">AI Reading Receipt</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="rOcrSub">Analysing image…</div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;margin-bottom:16px;">
+            <div id="rOcrBar" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#6C7CFF,var(--purple));width:0%;transition:width 0.45s cubic-bezier(0.22,1,0.36,1);box-shadow:0 0 10px rgba(108,124,255,0.55);"></div>
+          </div>
+          <!-- Steps -->
+          <div style="display:flex;flex-direction:column;gap:9px;" id="rOcrSteps">
+            <div class="rocr-step active" id="ros1"><div class="rocr-dot"><div class="rocr-dot-in"></div></div><span>Detecting receipt layout</span></div>
+            <div class="rocr-step" id="ros2"><div class="rocr-dot"><div class="rocr-dot-in"></div></div><span>Extracting text &amp; numbers</span></div>
+            <div class="rocr-step" id="ros3"><div class="rocr-dot"><div class="rocr-dot-in"></div></div><span>Identifying supplier &amp; amounts</span></div>
+            <div class="rocr-step" id="ros4"><div class="rocr-dot"><div class="rocr-dot-in"></div></div><span>Suggesting expense category</span></div>
+          </div>
+        </div>
+
+        <!-- Error state (hidden by default) -->
+        <div id="rErrorCard" style="display:none;margin:0 16px 14px;border-radius:var(--radius);padding:18px;
+                    background:rgba(240,78,94,0.06);border:0.5px solid rgba(240,78,94,0.25);
+                    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);">
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;flex-shrink:0;background:var(--red-bg);border:0.5px solid rgba(240,78,94,0.25);display:flex;align-items:center;justify-content:center;font-size:19px;">⚠️</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;">Could Not Read Receipt</div>
+              <div style="font-size:12px;color:var(--text3);line-height:1.6;">The image is too blurry or the text isn't clear enough. Try again with a cleaner photo, or enter details manually.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div onclick="rGoStep(1)" style="padding:10px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--card2);text-align:center;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s cubic-bezier(0.22,1,0.36,1);">Retry Upload</div>
+            <div onclick="rSkipOCR()" style="padding:10px;border-radius:var(--radius-sm);border:0.5px solid rgba(108,124,255,0.3);background:rgba(108,124,255,0.08);text-align:center;font-size:13px;font-weight:500;color:var(--accent2);cursor:pointer;transition:all 0.18s cubic-bezier(0.22,1,0.36,1);">Enter Manually</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 3: REVIEW FORM ═══ -->
+      <div id="rstep3" style="display:none">
+
+        <!-- Collapsed receipt thumb -->
+        <div style="margin:0 16px 12px;display:flex;align-items:center;gap:10px;background:var(--card2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#1a2246,#1e1a36);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🧾</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="rThumbName2">receipt.jpg</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:1px;" id="rOcrQuality">AI processed · 4 fields extracted</div>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:0.5px solid rgba(30,196,110,0.2);padding:3px 8px;border-radius:100px;" id="rStatusChip">✓ Done</div>
+        </div>
+
+        <!-- AI NOTE BANNER -->
+        <div style="margin:0 16px 14px;border-radius:var(--radius-sm);padding:13px 14px;
+                    background:linear-gradient(135deg,rgba(108,124,255,0.09),rgba(168,85,247,0.05));
+                    border:0.5px solid rgba(108,124,255,0.24);display:flex;align-items:flex-start;gap:10px;">
+          <div style="font-size:17px;flex-shrink:0;line-height:1;">✨</div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:3px;">Details auto-filled by AI</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">Please review all fields before saving. Tap any field to edit — you have full control.</div>
+          </div>
+        </div>
+
+        <!-- AMOUNT -->
+        <div style="padding:0 16px;margin-bottom:14px;">
+          <div class="kpi-label" style="margin-bottom:6px;">Total Amount <span id="rAmtAiTag" style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+          <div style="display:flex;align-items:center;border-radius:var(--radius-sm);overflow:hidden;border:0.5px solid rgba(108,124,255,0.3);background:#151C33;transition:border-color 0.18s,box-shadow 0.18s;">
+            <div style="padding:0 10px 0 14px;font-size:13px;font-weight:500;color:var(--text3);font-family:var(--font-num);border-right:0.5px solid rgba(255,255,255,0.08);align-self:stretch;display:flex;align-items:center;white-space:nowrap;">AED</div>
+            <input id="rAmt" type="number" value="247.50" inputmode="decimal"
+                   style="flex:1;background:none;border:none;outline:none;padding:11px 13px;font-size:22px;font-weight:700;color:var(--text);font-family:var(--font-num);font-variant-numeric:tabular-nums;"
+                   oninput="rRecalcVat()">
+          </div>
+          <div style="display:flex;gap:6px;margin-top:5px;align-items:center;">
+            <span style="font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green);border:0.5px solid rgba(30,196,110,0.2);padding:2px 8px;border-radius:100px;">✓ High confidence</span>
+            <span style="font-size:10px;color:var(--text3);background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);padding:2px 8px;border-radius:100px;">Incl. VAT</span>
+          </div>
+        </div>
+
+        <!-- CATEGORY DROPDOWN + GRID -->
+        <div style="padding:0 16px;margin-bottom:6px;">
+          <div class="kpi-label" style="margin-bottom:6px;">Expense Category <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+          <!-- Dropdown -->
+          <div style="position:relative;margin-bottom:10px;">
+            <select id="rCatSelect" onchange="rSyncCatFromDropdown(this.value)"
+                    style="width:100%;appearance:none;background:var(--card2);border:0.5px solid rgba(108,124,255,0.28);border-radius:var(--radius-sm);padding:11px 38px 11px 14px;font-size:14px;font-weight:500;color:var(--text);font-family:var(--font);outline:none;cursor:pointer;background-color:#151C33;transition:border-color 0.18s;">
+              <option value="Fuel">⛽ Fuel</option>
+              <option value="Maintenance" selected>🔧 Maintenance</option>
+              <option value="Insurance">🛡️ Insurance</option>
+              <option value="Registration">📋 Registration</option>
+              <option value="Toll">🛣️ Salik / Toll</option>
+              <option value="Car Wash">🧼 Car Wash</option>
+              <option value="Parking">🅿️ Parking</option>
+              <option value="Tyres">🛞 Tyres</option>
+              <option value="Fine">⚠️ Fine</option>
+              <option value="Other">📦 Other</option>
+            </select>
+            <div style="position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <!-- Visual grid (synced with dropdown) -->
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;" id="rCatGrid">
+            <div class="cat-item" onclick="rSelectCat(this,'Fuel')" data-cat="Fuel"><div class="cat-emoji" style="font-size:18px;">⛽</div><div class="cat-label">Fuel</div></div>
+            <div class="cat-item selected" onclick="rSelectCat(this,'Maintenance')" data-cat="Maintenance"><div class="cat-emoji" style="font-size:18px;">🔧</div><div class="cat-label">Maintenance</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Insurance')" data-cat="Insurance"><div class="cat-emoji" style="font-size:18px;">🛡️</div><div class="cat-label">Insurance</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Registration')" data-cat="Registration"><div class="cat-emoji" style="font-size:18px;">📋</div><div class="cat-label">Reg.</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Toll')" data-cat="Toll"><div class="cat-emoji" style="font-size:18px;">🛣️</div><div class="cat-label">Salik</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Car Wash')" data-cat="Car Wash"><div class="cat-emoji" style="font-size:18px;">🧼</div><div class="cat-label">Wash</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Parking')" data-cat="Parking"><div class="cat-emoji" style="font-size:18px;">🅿️</div><div class="cat-label">Parking</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Tyres')" data-cat="Tyres"><div class="cat-emoji" style="font-size:18px;">🛞</div><div class="cat-label">Tyres</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Fine')" data-cat="Fine"><div class="cat-emoji" style="font-size:18px;">⚠️</div><div class="cat-label">Fine</div></div>
+            <div class="cat-item" onclick="rSelectCat(this,'Other')" data-cat="Other"><div class="cat-emoji" style="font-size:18px;">📦</div><div class="cat-label">Other</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--accent2);margin-top:7px;display:flex;align-items:center;gap:4px;"><span style="font-size:12px;">✦</span> AI suggests <strong>Maintenance</strong> based on supplier name</div>
+        </div>
+
+        <div style="height:0.5px;background:rgba(255,255,255,0.06);margin:10px 16px 16px;"></div>
+
+        <!-- SUPPLIER DETAILS -->
+        <div style="padding:0 16px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:7px;">
+            Supplier Details
+            <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(108,124,255,0.12);color:var(--accent2);">AI extracted</span>
+          </div>
+
+          <div style="margin-bottom:11px;">
+            <div class="kpi-label" style="margin-bottom:5px;">Supplier / Service Provider <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+            <input class="text-input" id="rSupplier" style="background:#151C33;border-color:rgba(108,124,255,0.28);" type="text" value="Al Futtaim Auto Centre">
+            <div style="margin-top:4px;"><span style="font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green);border:0.5px solid rgba(30,196,110,0.2);padding:2px 8px;border-radius:100px;">✓ High confidence</span></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px;">
+            <div>
+              <div class="kpi-label" style="margin-bottom:5px;">Transaction Date <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+              <input class="text-input" style="background:#151C33;border-color:rgba(108,124,255,0.28);" type="date" id="rTxDate" value="2026-03-20">
+            </div>
+            <div>
+              <div class="kpi-label" style="margin-bottom:5px;">Invoice Date <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+              <input class="text-input" style="background:#151C33;border-color:rgba(108,124,255,0.28);" type="date" id="rInvDate" value="2026-03-20">
+            </div>
+          </div>
+
+          <div style="margin-bottom:11px;">
+            <div class="kpi-label" style="margin-bottom:5px;">Invoice Number <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+            <input class="text-input" style="background:#151C33;border-color:rgba(108,124,255,0.28);" type="text" id="rInvNum" value="INV-2026-047821">
+            <div style="margin-top:4px;"><span style="font-size:10px;font-weight:500;background:var(--amber-bg);color:var(--amber);border:0.5px solid rgba(240,168,50,0.2);padding:2px 8px;border-radius:100px;">~ Medium confidence — please verify</span></div>
+          </div>
+        </div>
+
+        <div style="height:0.5px;background:rgba(255,255,255,0.06);margin:4px 16px 16px;"></div>
+
+        <!-- VAT SECTION -->
+        <div style="padding:0 16px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">VAT Details</div>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;color:var(--text);">VAT Applicable</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px;">Detected on receipt</div>
+            </div>
+            <div class="switch on" id="rVatSwitch" onclick="rToggleVat()" style="flex-shrink:0;"><div class="switch-thumb"></div></div>
+          </div>
+
+          <div id="rVatFields">
+            <!-- VAT % selector pills -->
+            <div style="margin-bottom:10px;">
+              <div class="kpi-label" style="margin-bottom:6px;">VAT Rate <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;">
+                <div onclick="rSetVat(0)"  class="vat-pill" style="padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;">0%</div>
+                <div onclick="rSetVat(5)"  class="vat-pill active-vat" style="padding:7px 14px;border-radius:100px;border:0.5px solid rgba(108,124,255,0.4);background:rgba(108,124,255,0.12);font-size:13px;font-weight:600;color:var(--accent2);cursor:pointer;transition:all 0.18s;">5%</div>
+                <div onclick="rSetVat(9)"  class="vat-pill" style="padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;">9%</div>
+                <div onclick="rSetVat(15)" class="vat-pill" style="padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;">15%</div>
+                <div onclick="rSetVat('custom')" class="vat-pill" style="padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;">Custom</div>
+              </div>
+              <div id="rCustomVatWrap" style="display:none;margin-bottom:8px;">
+                <input class="text-input" id="rVatPct" type="number" value="5" min="0" max="100" step="0.1" placeholder="Enter VAT %" oninput="rRecalcVat()" style="background:#151C33;border-color:rgba(108,124,255,0.28);">
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px;">
+              <div>
+                <div class="kpi-label" style="margin-bottom:5px;">VAT Amount <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+                <input class="text-input" id="rVatAmt" type="number" value="11.79" step="0.01" style="background:#151C33;border-color:rgba(108,124,255,0.28);" readonly>
+              </div>
+              <div>
+                <div class="kpi-label" style="margin-bottom:5px;">Amount ex-VAT</div>
+                <input class="text-input" id="rAmtEx" type="number" value="235.71" step="0.01" style="background:var(--card2);" readonly>
+              </div>
+            </div>
+
+            <div style="margin-bottom:11px;">
+              <div class="kpi-label" style="margin-bottom:5px;">TRN (Tax Reg. No.) <span style="font-size:9px;font-weight:600;color:var(--accent2);background:rgba(108,124,255,0.12);border:0.5px solid rgba(108,124,255,0.2);padding:1px 6px;border-radius:100px;margin-left:5px;letter-spacing:0.04em;text-transform:none;">✦ AI</span></div>
+              <input class="text-input" style="background:#151C33;border-color:rgba(108,124,255,0.28);" type="text" value="100345678900003">
+              <div style="margin-top:4px;"><span style="font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green);border:0.5px solid rgba(30,196,110,0.2);padding:2px 8px;border-radius:100px;">✓ High confidence</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:0.5px;background:rgba(255,255,255,0.06);margin:4px 16px 16px;"></div>
+
+        <!-- ADDITIONAL INFO -->
+        <div style="padding:0 16px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">Additional Info</div>
+          <div style="margin-bottom:11px;">
+            <div class="kpi-label" style="margin-bottom:5px;">Vehicle</div>
+            <div style="position:relative;">
+              <select class="text-input" style="appearance:none;cursor:pointer;padding-right:36px;">
+                <option>🚗 BMW X5 — DXB·A1234</option>
+                <option>🚙 Toyota Land Cruiser — DXB·B5678</option>
+              </select>
+              <div style="position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+            </div>
+          </div>
+          <div style="margin-bottom:11px;">
+            <div class="kpi-label" style="margin-bottom:5px;">Odometer (km) <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">Optional</span></div>
+            <input class="text-input" type="number" placeholder="e.g. 87,420" inputmode="numeric">
+          </div>
+          <div style="margin-bottom:11px;">
+            <div class="kpi-label" style="margin-bottom:5px;">Notes</div>
+            <textarea class="text-input" rows="2" placeholder="Any additional notes…" style="resize:none;line-height:1.5;"></textarea>
+          </div>
+        </div>
+        <div style="height:120px;"></div>
+      </div>
+
+    </div><!-- /scroll-content -->
+
+    <!-- BOTTOM BAR -->
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px 28px;
+                background:linear-gradient(180deg,transparent 0%,rgba(11,15,26,0.97) 28%,#0B0F1A 100%);">
+      <button id="rPrimaryBtn" onclick="rHandlePrimary()"
+              style="width:100%;padding:15px;border:none;border-radius:100px;cursor:pointer;
+                     background:linear-gradient(135deg,#6C7CFF,#7B5EFF);font-size:15px;font-weight:600;
+                     color:white;font-family:var(--font);letter-spacing:0.01em;
+                     box-shadow:0 4px 18px rgba(108,124,255,0.42),inset 0 1px 0 rgba(255,255,255,0.18);
+                     transition:transform 0.18s cubic-bezier(0.22,1,0.36,1),box-shadow 0.18s,opacity 0.15s;
+                     display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="rPrimaryLabel">Upload Receipt</span>
+      </button>
+      <button onclick="rHandleDiscard()" style="width:100%;padding:10px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text3);font-family:var(--font);margin-top:4px;transition:color 0.15s;">Cancel</button>
+    </div>
+  </div>
+
+    <!-- =================== EXPENSES SCREEN =================== -->
+  <div class="screen" id="screen-expenses">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Expenses</div>
+        <div class="topbar-sub">All vehicles · March 2026</div>
+      </div>
+      <div class="topbar-action" onclick="openAddExpense()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <!-- Month summary -->
+      <div style="padding:16px 16px 0;">
+        <div style="background:linear-gradient(135deg,#1a2246,#252d4a);border-radius:var(--radius);padding:18px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">Total Spent</div>
+            <div style="font-family:var(--font-num);font-size:38px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">AED 2.8k</div>
+            <div style="font-size:12px;color:var(--green);margin-top:6px;font-weight:500;">↑ 12% vs last month</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">Transactions</div>
+            <div style="font-family:var(--font-num);font-size:38px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">24</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:6px;font-weight:400;">this month</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="pill-tabs" style="padding-top:14px;">
+        <div class="pill active">All</div>
+        <div class="pill">⛽ Fuel</div>
+        <div class="pill">🔧 Maintenance</div>
+        <div class="pill">🛡️ Insurance</div>
+        <div class="pill">🛣️ Toll</div>
+        <div class="pill">🧼 Wash</div>
+      </div>
+
+      <!-- Expense List with dates -->
+      <div style="padding:0 16px 4px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Today</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(255,184,63,0.12)">⛽</div>
+          <div class="exp-info"><div class="exp-name">ADNOC — Al Quoz</div><div class="exp-meta">Fuel · 87,420 km · Petrol 95</div></div>
+          <div class="exp-amount neg">−AED 180</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 4px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Yesterday</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🔧</div>
+          <div class="exp-info"><div class="exp-name">Al Futtaim Auto Centre</div><div class="exp-meta">Maintenance · 87,350 km</div></div>
+          <div class="exp-amount neg">−AED 450</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(34,212,212,0.12)">🛣️</div>
+          <div class="exp-info"><div class="exp-name">Salik Gate — Al Garhoud</div><div class="exp-meta">Toll · Auto-charged</div></div>
+          <div class="exp-amount neg">−AED 16</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 4px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">March 18</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(168,85,247,0.12)">🧼</div>
+          <div class="exp-info"><div class="exp-name">German Express Car Wash</div><div class="exp-meta">Car Wash · JBR</div></div>
+          <div class="exp-amount neg">−AED 60</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(255,91,106,0.12)">⚠️</div>
+          <div class="exp-info"><div class="exp-name">RTA Fine</div><div class="exp-meta">Fine · Speeding 121 km/h</div></div>
+          <div class="exp-amount neg">−AED 600</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 4px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">March 15</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(34,214,123,0.12)">🛞</div>
+          <div class="exp-info"><div class="exp-name">Michelin Tyre Replacement</div><div class="exp-meta">Tyres · Emirates Road Tyre</div></div>
+          <div class="exp-amount neg">−AED 1,200</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== MAINTENANCE SCREEN =================== -->
+  <div class="screen" id="screen-maintenance">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Maintenance</div>
+        <div class="topbar-sub">BMW X5 · 4 active reminders</div>
+      </div>
+      <div class="topbar-action" onclick="showToast('Reminder added')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <div class="pill-tabs" style="padding-top:14px;">
+        <div class="pill active">All</div>
+        <div class="pill danger" style="border-color:var(--red);color:var(--red)">Overdue 1</div>
+        <div class="pill">Due Soon</div>
+        <div class="pill">Upcoming</div>
+        <div class="pill">Completed</div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title" style="color:var(--red)">⚠️ Action Required</div></div>
+      <div class="maint-card" style="border-color:rgba(255,91,106,0.3)">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:var(--red-bg)">🔧</div>
+          <div>
+            <div class="maint-title">Engine Oil Change</div>
+            <div class="maint-due">Last done at 86,570 km · Interval 5,000 km</div>
+          </div>
+          <div class="maint-status overdue">850 km over</div>
+        </div>
+        <div class="maint-progress">
+          <div class="maint-progress-bar red fill-anim" style="width:117%"></div>
+        </div>
+        <div class="maint-footer">
+          <span>Due at 91,570 km</span>
+          <span style="color:var(--red);font-weight:600">Schedule Now →</span>
+        </div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title" style="color:var(--amber)">⏰ Due Soon</div></div>
+      <div class="maint-card" style="border-color:rgba(255,184,63,0.3)">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:var(--amber-bg)">🛡️</div>
+          <div>
+            <div class="maint-title">Insurance Renewal</div>
+            <div class="maint-due">Oman Insurance · Policy #INS-447281</div>
+          </div>
+          <div class="maint-status soon">18 days</div>
+        </div>
+        <div class="maint-progress">
+          <div class="maint-progress-bar amber fill-anim" style="width:85%"></div>
+        </div>
+        <div class="maint-footer"><span>Expires Apr 7, 2026</span><span>AED 3,200 est.</span></div>
+      </div>
+
+      <div class="maint-card" style="border-color:rgba(255,184,63,0.3)">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:var(--amber-bg)">🛞</div>
+          <div>
+            <div class="maint-title">Tyre Rotation</div>
+            <div class="maint-due">Recommended every 10,000 km</div>
+          </div>
+          <div class="maint-status soon">1,200 km</div>
+        </div>
+        <div class="maint-progress">
+          <div class="maint-progress-bar amber fill-anim" style="width:88%"></div>
+        </div>
+        <div class="maint-footer"><span>Due at 88,620 km</span><span>Current 87,420 km</span></div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title">Upcoming</div></div>
+      <div class="maint-card">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:var(--green-bg)">📋</div>
+          <div>
+            <div class="maint-title">Vehicle Registration</div>
+            <div class="maint-due">RTA Dubai · Annual renewal</div>
+          </div>
+          <div class="maint-status ok">45 days</div>
+        </div>
+        <div class="maint-progress">
+          <div class="maint-progress-bar green fill-anim" style="width:40%"></div>
+        </div>
+        <div class="maint-footer"><span>Expires May 4, 2026</span><span>AED 370 est.</span></div>
+      </div>
+
+      <div class="maint-card">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:rgba(79,110,247,0.1)">🔋</div>
+          <div>
+            <div class="maint-title">Battery Check</div>
+            <div class="maint-due">Last replaced Dec 2023 · 2.5 years</div>
+          </div>
+          <div class="maint-status ok">3 months</div>
+        </div>
+        <div class="maint-progress">
+          <div class="maint-progress-bar fill-anim" style="width:25%;background:var(--accent)"></div>
+        </div>
+        <div class="maint-footer"><span>Recommended Jun 2026</span><span>AED 400 est.</span></div>
+      </div>
+
+      <div class="sec-header"><div class="sec-title">Completed</div></div>
+      <div class="maint-card" style="opacity:0.6">
+        <div class="maint-header">
+          <div class="maint-icon" style="background:var(--green-bg)">✅</div>
+          <div>
+            <div class="maint-title">Brake Pad Replacement</div>
+            <div class="maint-due">Completed Mar 5, 2026 · Al Futtaim</div>
+          </div>
+          <div class="maint-status ok">Done</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== REPORTS SCREEN =================== -->
+  <div class="screen" id="screen-reports">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Reports & Insights</div>
+        <div class="topbar-sub">BMW X5 · All time</div>
+      </div>
+      <div class="topbar-action" onclick="showToast('Report exported to PDF')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <div class="pill-tabs" style="padding-top:14px;">
+        <div class="pill">Daily</div>
+        <div class="pill active">Monthly</div>
+        <div class="pill">Quarterly</div>
+        <div class="pill">Yearly</div>
+        <div class="pill">Custom</div>
+      </div>
+
+      <!-- Report Stats -->
+      <div class="report-stat-grid">
+        <div class="report-stat">
+          <div class="rs-label">Total Spent</div>
+          <div class="rs-value">AED 18.2k</div>
+          <div class="rs-sub">YTD 2026</div>
+        </div>
+        <div class="report-stat">
+          <div class="rs-label">Avg / Month</div>
+          <div class="rs-value">AED 6.1k</div>
+          <div class="rs-sub">Jan–Mar 2026</div>
+        </div>
+        <div class="report-stat">
+          <div class="rs-label">Cost per km</div>
+          <div class="rs-value">AED 0.94</div>
+          <div class="rs-sub">Total distance</div>
+        </div>
+        <div class="report-stat">
+          <div class="rs-label">Depreciation</div>
+          <div class="rs-value">AED 3.3k</div>
+          <div class="rs-sub">Monthly est.</div>
+        </div>
+      </div>
+
+      <!-- Trend Chart -->
+      <div class="sec-header"><div class="sec-title">Monthly Trend</div></div>
+      <div class="chart-wrap">
+        <div class="chart-inner" style="height:200px"><canvas id="trendChart"></canvas></div>
+      </div>
+
+      <!-- Category Donut -->
+      <div class="sec-header"><div class="sec-title">Spend by Category</div></div>
+      <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px;">
+        <div style="position:relative;width:130px;height:130px;flex-shrink:0"><canvas id="donutChart"></canvas></div>
+        <div style="flex:1">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#F0A832;flex-shrink:0"></div>
+              <div style="font-size:13px;color:var(--text2);flex:1">Fuel</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';min-width:32px;text-align:right">43%</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#4F6EF7;flex-shrink:0"></div>
+              <div style="font-size:13px;color:var(--text2);flex:1">Maintenance</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';min-width:32px;text-align:right">27%</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#A855F7;flex-shrink:0"></div>
+              <div style="font-size:13px;color:var(--text2);flex:1">Insurance</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';min-width:32px;text-align:right">17%</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#22D4D4;flex-shrink:0"></div>
+              <div style="font-size:13px;color:var(--text2);flex:1">Tolls</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';min-width:32px;text-align:right">8%</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#5A6180;flex-shrink:0"></div>
+              <div style="font-size:13px;color:var(--text2);flex:1">Other</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';min-width:32px;text-align:right">5%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Insight Card -->
+      <div class="sec-header"><div class="sec-title">✨ AI Insights</div></div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(79,110,247,0.08),rgba(123,94,255,0.08));border-color:rgba(79,110,247,0.2)">
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          💡 Your <strong style="color:var(--text)">fuel cost increased 18%</strong> in March vs February. This may be due to higher mileage on Sheikh Zayed Road. Consider refueling at ENOC stations — avg AED 4 cheaper per fill.<br><br>
+          📉 Based on your maintenance history, your BMW X5 will require an estimated <strong style="color:var(--text)">AED 6,800</strong> in servicing over the next 6 months.
+        </div>
+      </div>
+
+      <!-- Fuel Efficiency -->
+      <div class="sec-header"><div class="sec-title">Fuel Efficiency</div></div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi-card">
+          <div class="kpi-label">Avg Efficiency</div>
+          <div class="kpi-value">11.2</div>
+          <div class="kpi-sub">L / 100 km</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Fuel This Month</div>
+          <div class="kpi-value">AED 1,240</div>
+          <div class="kpi-trend up">↑ 18% vs Feb</div>
+        </div>
+      </div>
+
+      <!-- Export buttons -->
+      <div style="padding:0 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div onclick="showToast('PDF exported!')" style="background:var(--red-bg);border:1px solid rgba(255,91,106,0.3);border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;">
+          <div style="font-size:20px;margin-bottom:4px">📄</div>
+          <div style="font-size:13px;font-weight:600;color:var(--red)">Export PDF</div>
+        </div>
+        <div onclick="showToast('Excel exported!')" style="background:var(--green-bg);border:1px solid rgba(34,214,123,0.3);border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;">
+          <div style="font-size:20px;margin-bottom:4px">📊</div>
+          <div style="font-size:13px;font-weight:600;color:var(--green)">Export Excel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== VEHICLES SCREEN =================== -->
+  <div class="screen" id="screen-vehicles">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">My Vehicles</div>
+        <div class="topbar-sub">2 vehicles · 1 fleet org</div>
+      </div>
+      <div class="topbar-action" onclick="showToast('Add vehicle')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <!-- Vehicle Card 1 -->
+      <div class="vehicle-card" onclick="showToast('BMW X5 details')">
+        <div class="vehicle-card-header">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1929,#1a2e4a)"></div>
+          <div style="position:relative;z-index:1;text-align:center">
+            <div style="font-size:64px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))">🚗</div>
+          </div>
+          <div style="position:absolute;top:10px;right:12px;background:rgba(34,214,123,0.15);border:1px solid rgba(34,214,123,0.3);padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;color:var(--green)">Active</div>
+        </div>
+        <div class="vehicle-card-body">
+          <div class="vc-top">
+            <div>
+              <div class="vc-name">BMW X5 xDrive40i</div>
+              <div class="vc-year">2022 · Petrol · White</div>
+            </div>
+            <div class="vc-plate">DXB·A1234</div>
+          </div>
+          <div class="vc-stats">
+            <div class="vc-stat">
+              <div class="vc-stat-val">87.4k</div>
+              <div class="vc-stat-label">Odometer (km)</div>
+            </div>
+            <div class="vc-stat">
+              <div class="vc-stat-val">AED 18.2k</div>
+              <div class="vc-stat-label">YTD Cost</div>
+            </div>
+            <div class="vc-stat">
+              <div class="vc-stat-val">AED 0.94</div>
+              <div class="vc-stat-label">Per km</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Card 2 -->
+      <div class="vehicle-card" onclick="showToast('Toyota LC details')">
+        <div class="vehicle-card-header">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a2212,#2a3a1a)"></div>
+          <div style="position:relative;z-index:1;text-align:center">
+            <div style="font-size:64px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))">🚙</div>
+          </div>
+          <div style="position:absolute;top:10px;right:12px;background:rgba(34,214,123,0.15);border:1px solid rgba(34,214,123,0.3);padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;color:var(--green)">Active</div>
+        </div>
+        <div class="vehicle-card-body">
+          <div class="vc-top">
+            <div>
+              <div class="vc-name">Toyota Land Cruiser</div>
+              <div class="vc-year">2020 · Diesel · Black</div>
+            </div>
+            <div class="vc-plate">DXB·B5678</div>
+          </div>
+          <div class="vc-stats">
+            <div class="vc-stat">
+              <div class="vc-stat-val">142.3k</div>
+              <div class="vc-stat-label">Odometer (km)</div>
+            </div>
+            <div class="vc-stat">
+              <div class="vc-stat-val">AED 22.1k</div>
+              <div class="vc-stat-label">YTD Cost</div>
+            </div>
+            <div class="vc-stat">
+              <div class="vc-stat-val">AED 1.12</div>
+              <div class="vc-stat-label">Per km</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents section -->
+      <div class="sec-header">
+        <div class="sec-title">Documents</div>
+        <div style="display:flex;gap:12px;">
+          <div class="sec-link" onclick="showToast('Upload document')">Upload</div>
+          <div class="sec-link" onclick="showScreen('documents')">View All</div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(34,214,123,0.12)">📋</div>
+          <div class="exp-info"><div class="exp-name">Insurance Certificate</div><div class="exp-meta">BMW X5 · Expires Apr 7, 2026</div></div>
+          <div style="color:var(--amber);font-size:12px;font-weight:600">⚠️ Soon</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🪪</div>
+          <div class="exp-info"><div class="exp-name">Vehicle Registration</div><div class="exp-meta">BMW X5 · Expires May 4, 2026</div></div>
+          <div style="color:var(--green);font-size:12px;font-weight:600">✓ Valid</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(168,85,247,0.12)">📝</div>
+          <div class="exp-info"><div class="exp-name">Purchase Contract</div><div class="exp-meta">BMW X5 · Jan 2022</div></div>
+          <div style="color:var(--text3);font-size:12px">PDF</div>
+        </div>
+        <div class="expense-row">
+          <div class="exp-icon" style="background:rgba(34,212,212,0.12)">🔧</div>
+          <div class="exp-info"><div class="exp-name">Service Contract</div><div class="exp-meta">Toyota LC · BMW Al Futtaim</div></div>
+          <div style="color:var(--green);font-size:12px;font-weight:600">✓ Active</div>
+        </div>
+      </div>
+
+      <!-- Depreciation -->
+      <div class="sec-header"><div class="sec-title">Depreciation Tracker</div></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400">Purchase Price</div>
+            <div style="font-size:22px;font-weight:800;font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-0.5px">AED 312k</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;font-weight:400">Current Value</div>
+            <div style="font-size:22px;font-weight:800;font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--amber)">AED 238k</div>
+          </div>
+        </div>
+        <div style="height:8px;background:var(--bg4);border-radius:100px;overflow:hidden;margin-bottom:8px">
+          <div class="fill-anim" style="height:100%;width:76%;background:linear-gradient(90deg,var(--accent),var(--amber));border-radius:100px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
+          <span>4.2 years old</span>
+          <span>76% residual value</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== PROFILE SCREEN =================== -->
+  <div class="screen" id="screen-profile">
+    <div class="topbar">
+      <div class="topbar-title">Account</div>
+      <div class="topbar-action" onclick="showToast('Settings saved')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scroll-content">
+      <div class="profile-header">
+        <div class="avatar">TN</div>
+        <div class="profile-name">Tarik Niche</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e59184978c8ecb8b8c868d80a58288848c89cb868a88">[email&#160;protected]</a></div>
+        <div class="profile-plan">✦ Premium Plan</div>
+      </div>
+
+      <!-- Subscription Card -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(79,110,247,0.1),rgba(123,94,255,0.1));border-color:rgba(79,110,247,0.25);margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:15px;font-weight:700;font-family:var(--font-display)">Premium Plan</div>
+          <div style="font-size:13px;color:var(--accent2);font-weight:600">AED 39/mo</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="font-size:12px;color:var(--text2)">✓ Unlimited vehicles</div>
+          <div style="font-size:12px;color:var(--text2)">✓ AI insights</div>
+          <div style="font-size:12px;color:var(--text2)">✓ Advanced reports</div>
+          <div style="font-size:12px;color:var(--text2)">✓ PDF/Excel export</div>
+          <div style="font-size:12px;color:var(--text2)">✓ OCR scanning</div>
+          <div style="font-size:12px;color:var(--text2)">✓ Cloud sync</div>
+        </div>
+        <div style="margin-top:12px;background:rgba(79,110,247,0.2);border-radius:8px;padding:8px;text-align:center;font-size:12px;color:var(--accent2);font-weight:500;cursor:pointer" onclick="showToast('Upgrade to Fleet plan')">
+          Upgrade to Fleet → AED 99/mo for teams
+        </div>
+      </div>
+
+      <!-- Settings Rows -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(79,110,247,0.1)">👤</div>
+          <div class="settings-label">Personal Details</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(255,184,63,0.1)">💰</div>
+          <div class="settings-label">Default Currency</div>
+          <div style="font-size:13px;color:var(--text3);margin-right:8px">AED</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(34,214,123,0.1)">🔔</div>
+          <div class="settings-label">Notifications</div>
+          <div class="settings-badge" style="background:var(--green-bg);color:var(--green)">ON</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(168,85,247,0.1)">🔄</div>
+          <div class="settings-label">Cloud Backup</div>
+          <div class="settings-badge" style="background:var(--green-bg);color:var(--green)">Auto</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(255,184,63,0.1)">📊</div>
+          <div class="settings-label">Analytics & Tracking</div>
+          <div class="switch on" id="analyticsSwitch" onclick="toggleSwitch('analyticsSwitch')">
+            <div class="switch-thumb"></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(34,212,212,0.1)">🌙</div>
+          <div class="settings-label">Dark Mode</div>
+          <div class="switch on" id="darkSwitch" onclick="toggleSwitch('darkSwitch')">
+            <div class="switch-thumb"></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div class="settings-icon" style="background:rgba(79,110,247,0.1)">📍</div>
+          <div class="settings-label">GPS Tracking (Beta)</div>
+          <div class="settings-badge" style="background:var(--amber-bg);color:var(--amber)">Soon</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div class="settings-row" onclick="showToast('Support opened')">
+          <div class="settings-icon" style="background:rgba(34,212,212,0.1)">💬</div>
+          <div class="settings-label">Help & Support</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showToast('Rate us!')">
+          <div class="settings-icon" style="background:rgba(255,184,63,0.1)">⭐</div>
+          <div class="settings-label">Rate AutoTrack</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showToast('Version 2.4.1 — Latest')">
+          <div class="settings-icon" style="background:rgba(168,85,247,0.1)">ℹ️</div>
+          <div class="settings-label">App Version</div>
+          <div style="font-size:13px;color:var(--text3);margin-right:8px">2.4.1</div>
+        </div>
+      </div>
+
+      <!-- Privacy & Legal -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div style="padding:10px 16px 6px;">
+          <div style="font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Privacy &amp; Legal</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showScreen('privacy')">
+          <div class="settings-icon" style="background:rgba(108,124,255,0.12)">🔐</div>
+          <div class="settings-label">Privacy Policy</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showScreen('terms')">
+          <div class="settings-icon" style="background:rgba(34,212,212,0.1)">📜</div>
+          <div class="settings-label">Terms &amp; Conditions</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showScreen('data-permissions')">
+          <div class="settings-icon" style="background:rgba(30,196,110,0.1)">🛡️</div>
+          <div class="settings-label">Data &amp; Permissions</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row" onclick="showDeleteDataModal()">
+          <div class="settings-icon" style="background:rgba(240,78,94,0.1)">🗑️</div>
+          <div class="settings-label" style="color:var(--red)">Delete My Data</div>
+          <div class="settings-arrow" style="color:var(--red)">›</div>
+        </div>
+      </div>
+
+      <div style="padding:4px 16px 24px">
+        <div onclick="showToast('Signed out')" style="background:var(--red-bg);border:1px solid rgba(255,91,106,0.2);border-radius:var(--radius-sm);padding:14px;text-align:center;font-size:14px;font-weight:600;color:var(--red);cursor:pointer">
+          Sign Out
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =================== PRIVACY POLICY =================== -->
+  <div class="screen" id="screen-privacy">
+    <div class="legal-topbar">
+      <div class="topbar-action" onclick="showScreen('profile')" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="topbar-title">Privacy Policy</div>
+      <div style="width:38px;"></div>
+    </div>
+    <div class="legal-scroll">
+
+      <!-- Hero -->
+      <div class="legal-hero">
+        <div class="legal-hero-icon" style="background:linear-gradient(135deg,rgba(108,124,255,0.22),rgba(76,90,230,0.12));border:0.5px solid rgba(108,124,255,0.28);">🔐</div>
+        <div class="legal-hero-title">Privacy Policy</div>
+        <div class="legal-hero-meta">
+          <span style="background:var(--green-bg);color:var(--green);border:0.5px solid rgba(30,196,110,0.2);padding:2px 8px;border-radius:100px;font-weight:600;font-size:11px;">GDPR Compliant</span>
+          <span>·</span>
+          <span>Last updated: March 20, 2026</span>
+        </div>
+      </div>
+
+      <!-- Trust grid -->
+      <div style="padding:16px 20px 8px;font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Our Commitments</div>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <div class="trust-card-icon">🚫</div>
+          <div class="trust-card-title">Never Sold</div>
+          <div class="trust-card-sub">Your data is never sold to third parties</div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-card-icon">🔒</div>
+          <div class="trust-card-title">Encrypted</div>
+          <div class="trust-card-sub">AES-256 encryption at rest &amp; in transit</div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-card-icon">🤖</div>
+          <div class="trust-card-title">AI Transparent</div>
+          <div class="trust-card-sub">You control all AI-assisted data</div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-card-icon">🌍</div>
+          <div class="trust-card-title">GDPR Ready</div>
+          <div class="trust-card-sub">Full rights: access, edit, delete, export</div>
+        </div>
+      </div>
+
+      <!-- AI Highlight -->
+      <div style="padding:20px 20px 0;">
+        <div class="legal-highlight">
+          <div class="legal-highlight-icon">✨</div>
+          <div class="legal-highlight-text">
+            <strong>AI &amp; OCR Transparency.</strong> Receipts you upload may be processed using AI OCR to extract details such as supplier name, amount, and date. This data is used only to pre-fill your expense form and improve your experience. <strong>Your receipt data is never shared or sold.</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">📋</span>1. Information We Collect</div>
+        <div class="legal-p">We collect only what's necessary to provide AutoTrack's features:</div>
+        <ul class="legal-ul">
+          <li><strong style="color:var(--text);">Account data</strong> — name, email address, password (hashed), and profile preferences</li>
+          <li><strong style="color:var(--text);">Vehicle data</strong> — make, model, year, plate number, odometer readings, fuel type</li>
+          <li><strong style="color:var(--text);">Expense data</strong> — amounts, categories, dates, vendor names, and notes you enter</li>
+          <li><strong style="color:var(--text);">Uploaded content</strong> — receipt images and PDFs processed via AI OCR for field extraction</li>
+          <li><strong style="color:var(--text);">Usage data</strong> — app interactions, feature usage, crash reports, and session analytics</li>
+          <li><strong style="color:var(--text);">Device data</strong> — device type, OS version, and language settings</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 2 -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">⚙️</span>2. How We Use Your Data</div>
+        <ul class="legal-ul">
+          <li>Provide expense tracking, reporting, and maintenance reminders</li>
+          <li>Process receipt images using AI OCR to auto-fill expense fields</li>
+          <li>Generate insights and cost analytics for your vehicles</li>
+          <li>Send push notifications and service reminders you've opted into</li>
+          <li>Improve app performance, fix bugs, and develop new features</li>
+          <li>Comply with legal obligations and respond to lawful requests</li>
+        </ul>
+        <div class="legal-highlight">
+          <div class="legal-highlight-icon">🛡️</div>
+          <div class="legal-highlight-text">We respect your privacy and <strong>never sell your data</strong> to advertisers, data brokers, or any third party. Full stop.</div>
+        </div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 3: AI OCR -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🤖</span>3. AI &amp; OCR Processing</div>
+        <div class="legal-p">AutoTrack uses AI-powered Optical Character Recognition (OCR) to extract information from receipts you upload. Here's exactly what that means for you:</div>
+        <ul class="legal-ul">
+          <li>Receipts are sent to a secure AI processing service to extract text</li>
+          <li>Extracted fields (supplier, date, amount, VAT) are returned to your device and pre-filled in the form</li>
+          <li>You can review, correct, or override any AI-extracted field before saving</li>
+          <li>Receipt images are not permanently stored beyond your document vault</li>
+          <li>AI data is used only to improve your experience, not for advertising</li>
+        </ul>
+        <div class="legal-p" style="font-style:italic;color:var(--text3);">"AI helps automate your entries, but you stay in control."</div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 4: Storage -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🔒</span>4. Data Storage &amp; Security</div>
+        <ul class="legal-ul">
+          <li>All data is stored on encrypted cloud servers (AES-256)</li>
+          <li>Data in transit is protected using TLS 1.3</li>
+          <li>Authentication uses industry-standard secure token mechanisms</li>
+          <li>We conduct regular security audits and vulnerability assessments</li>
+          <li>Access to your data is restricted to authorised AutoTrack systems only</li>
+          <li>Backups are encrypted and stored in geographically redundant locations</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 5: User Rights -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">⚖️</span>5. Your Rights (GDPR &amp; Global)</div>
+        <div class="legal-p">Regardless of where you are in the world, you have the following rights:</div>
+        <ul class="legal-ul">
+          <li><strong style="color:var(--text);">Access</strong> — Request a copy of all data we hold about you</li>
+          <li><strong style="color:var(--text);">Correction</strong> — Update or correct inaccurate personal data</li>
+          <li><strong style="color:var(--text);">Deletion</strong> — Request full deletion of your account and all associated data</li>
+          <li><strong style="color:var(--text);">Portability</strong> — Export your expense data in CSV or PDF format</li>
+          <li><strong style="color:var(--text);">Objection</strong> — Opt out of non-essential data processing at any time</li>
+          <li><strong style="color:var(--text);">Restriction</strong> — Limit how your data is processed while a dispute is resolved</li>
+        </ul>
+        <div class="legal-p">To exercise any right, contact us at <span style="color:var(--accent2);">privacy@autotrack.app</span> or use the "Delete My Data" option in Account settings.</div>
+        <div class="legal-p" style="font-style:italic;color:var(--text3);">"You can request deletion of your data anytime."</div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 6: Third Party -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🔗</span>6. Third-Party Services</div>
+        <div class="legal-p">AutoTrack uses trusted third-party services to operate. Each is bound by strict data processing agreements:</div>
+        <ul class="legal-ul">
+          <li><strong style="color:var(--text);">Cloud Infrastructure</strong> — AWS / Google Cloud (encrypted storage)</li>
+          <li><strong style="color:var(--text);">Authentication</strong> — Secure identity provider with MFA support</li>
+          <li><strong style="color:var(--text);">AI / OCR</strong> — Receipt processing (data not retained post-extraction)</li>
+          <li><strong style="color:var(--text);">Analytics</strong> — Anonymised usage analytics (no personal identifiers shared)</li>
+          <li><strong style="color:var(--text);">Push Notifications</strong> — Firebase Cloud Messaging (device token only)</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 7: International -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🌍</span>7. International Use</div>
+        <div class="legal-p">AutoTrack is available globally. If you use the app outside your home country, your data may be processed in a different region. We ensure all cross-border transfers comply with applicable data protection laws, including GDPR Standard Contractual Clauses (SCCs) where required.</div>
+        <div class="legal-p">The app is operated in compliance with UAE data protection regulations and applicable international standards.</div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <!-- Section 8: Contact -->
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">✉️</span>8. Contact &amp; Privacy Questions</div>
+        <div class="legal-p">For any privacy-related questions, data requests, or concerns:</div>
+        <div style="background:var(--card2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">AutoTrack Privacy Team</div>
+          <div style="font-size:13px;color:var(--accent2);margin-bottom:3px;">privacy@autotrack.app</div>
+          <div style="font-size:12px;color:var(--text3);">We aim to respond within 72 hours</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="legal-bottom-actions">
+        <button class="legal-action-btn primary" onclick="showToast('Opening support…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Contact Privacy Team
+        </button>
+        <button class="legal-action-btn secondary" onclick="showToast('PDF downloading…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="legal-action-btn danger" onclick="showDeleteDataModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete My Data
+        </button>
+      </div>
+      <div style="height:32px;"></div>
+    </div>
+  </div>
+
+  <!-- =================== TERMS & CONDITIONS =================== -->
+  <div class="screen" id="screen-terms">
+    <div class="legal-topbar">
+      <div class="topbar-action" onclick="showScreen('profile')" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="topbar-title">Terms &amp; Conditions</div>
+      <div style="width:38px;"></div>
+    </div>
+    <div class="legal-scroll">
+      <div class="legal-hero">
+        <div class="legal-hero-icon" style="background:linear-gradient(135deg,rgba(34,212,212,0.18),rgba(34,212,212,0.08));border:0.5px solid rgba(34,212,212,0.25);">📜</div>
+        <div class="legal-hero-title">Terms &amp; Conditions</div>
+        <div class="legal-hero-meta">
+          <span>Last updated: March 20, 2026</span>
+          <span>·</span>
+          <span>v2.4</span>
+        </div>
+      </div>
+
+      <div style="padding:16px 20px 4px;">
+        <div class="legal-highlight">
+          <div class="legal-highlight-icon">📌</div>
+          <div class="legal-highlight-text">By using AutoTrack, you agree to these terms. We've written them in plain language — no legal jargon. If something's unclear, contact us at <strong>support@autotrack.app</strong></div>
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">✅</span>1. Acceptance of Terms</div>
+        <div class="legal-p">By downloading, installing, or using AutoTrack, you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the app. These terms apply to all users including free, Premium, and Fleet plan subscribers.</div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">👤</span>2. Account Responsibilities</div>
+        <ul class="legal-ul">
+          <li>You are responsible for maintaining the security of your account credentials</li>
+          <li>You must provide accurate information when creating your account</li>
+          <li>You may not share your account with others or create multiple accounts</li>
+          <li>You are responsible for all activity that occurs under your account</li>
+          <li>Notify us immediately at security@autotrack.app if you suspect unauthorised access</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">💳</span>3. Subscription &amp; Billing</div>
+        <div class="legal-p">AutoTrack offers the following plans:</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:var(--card2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Free Plan</div>
+              <div style="font-size:13px;font-weight:700;color:var(--green);">AED 0</div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);">1 vehicle, basic tracking, limited reports</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(108,124,255,0.1),rgba(76,90,230,0.06)),var(--card2);border:0.5px solid rgba(108,124,255,0.25);border-radius:var(--radius-sm);padding:12px 14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Premium Plan</div>
+              <div style="font-size:13px;font-weight:700;color:var(--accent2);">AED 39 / month</div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);">Unlimited vehicles, AI OCR, advanced reports, export</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(168,85,247,0.04)),var(--card2);border:0.5px solid rgba(168,85,247,0.25);border-radius:var(--radius-sm);padding:12px 14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Fleet Plan</div>
+              <div style="font-size:13px;font-weight:700;color:var(--purple);">AED 99 / month</div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);">Team access, fleet dashboard, analytics, priority support</div>
+          </div>
+        </div>
+        <ul class="legal-ul">
+          <li>Subscriptions renew automatically unless cancelled at least 24 hours before the renewal date</li>
+          <li>You can manage or cancel your subscription in Account settings at any time</li>
+          <li>Refunds are not provided for partial billing periods unless required by law</li>
+          <li>Prices are subject to change with 30 days advance notice</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🤖</span>4. Use of AI Features</div>
+        <div class="legal-highlight">
+          <div class="legal-highlight-icon">⚠️</div>
+          <div class="legal-highlight-text"><strong>OCR accuracy is not guaranteed.</strong> AI-extracted receipt data may contain errors. You are responsible for reviewing and confirming all AI-pre-filled fields before saving an expense.</div>
+        </div>
+        <ul class="legal-ul">
+          <li>AutoTrack's AI features are provided as a convenience tool only</li>
+          <li>AI-generated suggestions (categories, amounts, dates) are recommendations, not financial advice</li>
+          <li>AutoTrack is not liable for decisions made based solely on AI-extracted data</li>
+          <li>You can disable AI features or override any AI input at any time</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🚫</span>5. Acceptable Use</div>
+        <div class="legal-p">You agree not to use AutoTrack for any of the following:</div>
+        <ul class="legal-ul">
+          <li>Any fraudulent, deceptive, or illegal activity</li>
+          <li>Submitting false expense data for financial fraud</li>
+          <li>Attempting to access other users' accounts or data</li>
+          <li>Reverse engineering, decompiling, or tampering with the app</li>
+          <li>Uploading malicious content, viruses, or harmful code</li>
+          <li>Violating any applicable local, national, or international law</li>
+        </ul>
+        <div class="legal-p">Violations may result in immediate account suspension without refund.</div>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">📁</span>6. Data Ownership</div>
+        <ul class="legal-ul">
+          <li>You retain full ownership of all data you enter into AutoTrack</li>
+          <li>By using the app, you grant AutoTrack a limited, non-exclusive licence to process your data solely to provide the service</li>
+          <li>We do not claim ownership of your expense records, vehicle data, or uploaded receipts</li>
+          <li>You can export or delete your data at any time</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">⚖️</span>7. Limitation of Liability</div>
+        <ul class="legal-ul">
+          <li>AutoTrack provides expense tracking, estimates, and insights for informational purposes only</li>
+          <li>We are not a financial, tax, or legal advisory service</li>
+          <li>AutoTrack is not liable for financial decisions made using data from the app</li>
+          <li>Our maximum liability is limited to the amount you paid in the last 3 months</li>
+          <li>We are not responsible for data loss resulting from user action or third-party service outages</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🚪</span>8. Account Termination</div>
+        <ul class="legal-ul">
+          <li>You may delete your account at any time from Account settings</li>
+          <li>AutoTrack may suspend accounts that violate these terms</li>
+          <li>Upon deletion, your data is permanently removed within 30 days</li>
+          <li>Subscription fees are not refunded upon account termination</li>
+        </ul>
+      </div>
+      <div class="legal-divider" style="margin:20px 20px 0;"></div>
+
+      <div class="legal-section">
+        <div class="legal-section-title"><span class="lsi">🔔</span>9. Updates to Terms</div>
+        <div class="legal-p">We may update these Terms from time to time. For material changes, we will notify you via:</div>
+        <ul class="legal-ul">
+          <li>In-app notification at least 14 days before changes take effect</li>
+          <li>Email to your registered address</li>
+          <li>Updated "Last updated" date at the top of this page</li>
+        </ul>
+        <div class="legal-p">Continued use of AutoTrack after changes constitutes acceptance of the new terms.</div>
+      </div>
+
+      <div class="legal-bottom-actions">
+        <button class="legal-action-btn primary" onclick="showToast('Opening support…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Contact Support
+        </button>
+        <button class="legal-action-btn secondary" onclick="showToast('PDF downloading…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+      </div>
+      <div style="height:32px;"></div>
+    </div>
+  </div>
+
+  <!-- =================== DOCUMENT VAULT SCREEN =================== -->
+  <div class="screen" id="screen-documents">
+    <div class="topbar">
+      <div class="topbar-action" onclick="showScreen('home')" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div><div class="topbar-title">Document Vault</div></div>
+      <div class="topbar-action" onclick="showToast('Search documents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+    </div>
+    
+    <div class="scroll-content">
+      <!-- Search & Categories -->
+      <div style="padding:16px 20px 0;">
+        <div style="position:relative;margin-bottom:16px;">
+          <input type="text" placeholder="Search receipts, policies..." class="text-input" style="padding-left:40px;background:var(--card);border-color:var(--border2);">
+          <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="pill-tabs">
+        <div class="pill active">All Docs</div>
+        <div class="pill">Receipts</div>
+        <div class="pill">Insurance</div>
+        <div class="pill">Registration</div>
+        <div class="pill">Fines</div>
+      </div>
+
+      <!-- Document Grid -->
+      <div style="padding:0 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <!-- Doc 1 -->
+        <div class="card-sm" style="padding:14px;cursor:pointer;" onclick="showToast('Opening Insurance PDF')">
+          <div style="width:100%;height:100px;background:linear-gradient(135deg,#1a2246,#12182b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px;position:relative;border:0.5px solid rgba(255,255,255,0.05);">
+            🛡️
+            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);width:10px;height:10px;border-radius:50%;border:2px solid #1a2246;"></div>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Insurance_2026.pdf</div>
+          <div style="font-size:11px;color:var(--text3);">Expires Apr 7 · 1.2MB</div>
+        </div>
+        <!-- Doc 2 -->
+        <div class="card-sm" style="padding:14px;cursor:pointer;" onclick="showToast('Opening Mulkiya')">
+          <div style="width:100%;height:100px;background:linear-gradient(135deg,#12221a,#0d1a14);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px;position:relative;border:0.5px solid rgba(255,255,255,0.05);">
+            🪪
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mulkiya_X5.png</div>
+          <div style="font-size:11px;color:var(--text3);">Valid · 840KB</div>
+        </div>
+        <!-- Doc 3 -->
+        <div class="card-sm" style="padding:14px;cursor:pointer;" onclick="showToast('Opening ADNOC Receipt')">
+          <div style="width:100%;height:100px;background:linear-gradient(135deg,#231d12,#1a160d);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px;position:relative;border:0.5px solid rgba(255,255,255,0.05);">
+            ⛽
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Fuel_Receipt_Mar20.jpg</div>
+          <div style="font-size:11px;color:var(--text3);">Today · 2.1MB</div>
+        </div>
+        <!-- Doc 4 -->
+        <div class="card-sm" style="padding:14px;cursor:pointer;" onclick="showToast('Opening Service Invoice')">
+          <div style="width:100%;height:100px;background:linear-gradient(135deg,#1a1a2e,#11111f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px;position:relative;border:0.5px solid rgba(255,255,255,0.05);">
+            🔧
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Service_INV_447.pdf</div>
+          <div style="font-size:11px;color:var(--text3);">Mar 19 · 3.4MB</div>
+        </div>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(108,124,255,0.08),rgba(168,85,247,0.05));border-color:rgba(108,124,255,0.2);">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:18px;">✨</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+            <strong style="color:var(--accent2)">Pro Tip:</strong> All receipts uploaded via AI OCR are automatically saved here in your vault for easy tax reporting.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload FAB for vault -->
+    <div class="fab-sub" style="bottom: 24px; right: 20px; width:56px; height:56px; border-radius:18px; background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 16px var(--accent-glow); position:absolute;" onclick="showToast('Upload to vault')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+  </div>
+
+  <!-- =================== DATA & PERMISSIONS =================== -->
+  <div class="screen" id="screen-data-permissions">
+    <div class="legal-topbar">
+      <div class="topbar-action" onclick="showScreen('profile')" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="topbar-title">Data &amp; Permissions</div>
+      <div style="width:38px;"></div>
+    </div>
+    <div class="legal-scroll">
+      <div class="legal-hero">
+        <div class="legal-hero-icon" style="background:linear-gradient(135deg,rgba(30,196,110,0.18),rgba(30,196,110,0.08));border:0.5px solid rgba(30,196,110,0.25);">🛡️</div>
+        <div class="legal-hero-title">Data &amp; Permissions</div>
+        <div class="legal-hero-meta"><span>You are in control of your data</span></div>
+      </div>
+
+      <!-- Data usage toggles -->
+      <div style="padding:20px 20px 0;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;">Data Preferences</div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">Analytics &amp; Usage Data</div>
+            <div class="data-toggle-sub">Help improve AutoTrack by sharing anonymised usage data. No personal info included.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+        </div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">AI Receipt Processing</div>
+            <div class="data-toggle-sub">Allow receipts to be processed by AI OCR to auto-fill expense fields.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+        </div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">Personalised Insights</div>
+            <div class="data-toggle-sub">Allow AutoTrack to generate cost patterns and AI spending insights based on your data.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+        </div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">Push Notifications</div>
+            <div class="data-toggle-sub">Maintenance reminders, insurance renewal alerts, and budget warnings.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+        </div>
+
+        <div class="data-toggle-row">
+          <div class="data-toggle-info">
+            <div class="data-toggle-label">Crash Reports</div>
+            <div class="data-toggle-sub">Automatically send error reports to help fix bugs faster. No personal data included.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"><div class="switch-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="legal-divider" style="margin:20px 20px;"></div>
+
+      <!-- Device permissions -->
+      <div style="padding:0 20px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;">Device Permissions</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div class="data-toggle-row">
+            <div class="data-toggle-info">
+              <div class="data-toggle-label">Camera</div>
+              <div class="data-toggle-sub">Required for scanning receipts and capturing mileage photos.</div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:0.5px solid rgba(30,196,110,0.2);padding:3px 8px;border-radius:100px;">Allowed</span>
+          </div>
+          <div class="data-toggle-row">
+            <div class="data-toggle-info">
+              <div class="data-toggle-label">Photo Library</div>
+              <div class="data-toggle-sub">Required to upload receipt images from your gallery.</div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:0.5px solid rgba(30,196,110,0.2);padding:3px 8px;border-radius:100px;">Allowed</span>
+          </div>
+          <div class="data-toggle-row">
+            <div class="data-toggle-info">
+              <div class="data-toggle-label">Notifications</div>
+              <div class="data-toggle-sub">Alerts for maintenance due, insurance expiry, and reminders.</div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:0.5px solid rgba(30,196,110,0.2);padding:3px 8px;border-radius:100px;">Allowed</span>
+          </div>
+          <div class="data-toggle-row">
+            <div class="data-toggle-info">
+              <div class="data-toggle-label">Location (GPS)</div>
+              <div class="data-toggle-sub">Optional — used for automatic trip tracking (Premium feature).</div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-bg);border:0.5px solid rgba(240,168,50,0.2);padding:3px 8px;border-radius:100px;">Coming soon</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="legal-divider" style="margin:20px 20px;"></div>
+
+      <!-- Data export / portability -->
+      <div style="padding:0 20px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">Your Data</div>
+        <div class="legal-highlight">
+          <div class="legal-highlight-icon">📦</div>
+          <div class="legal-highlight-text">You own your data. Export everything or delete it completely — no questions asked.</div>
+        </div>
+      </div>
+
+      <div class="legal-bottom-actions">
+        <button class="legal-action-btn primary" onclick="showToast('Exporting your data…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export My Data
+        </button>
+        <button class="legal-action-btn secondary" onclick="showToast('Request submitted')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Request Data Report
+        </button>
+        <button class="legal-action-btn danger" onclick="showDeleteDataModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete My Data
+        </button>
+      </div>
+      <div style="height:32px;"></div>
+    </div>
+  </div>
+
+  <!-- DELETE DATA CONFIRMATION MODAL -->
+  <div class="delete-modal-overlay" id="deleteModal" onclick="if(event.target===this)closeDeleteModal()">
+    <div class="delete-modal-sheet">
+      <div style="width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:12px auto 16px;"></div>
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="font-size:40px;margin-bottom:10px;">🗑️</div>
+        <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Delete All My Data?</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;">This will permanently delete your account, all vehicles, expenses, documents, and receipts. <strong style="color:var(--text);">This action cannot be undone.</strong></div>
+      </div>
+      <div style="background:var(--red-bg);border:0.5px solid rgba(240,78,94,0.25);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;">
+        <div style="font-size:15px;flex-shrink:0;">⚠️</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">Your subscription will be cancelled immediately. You will lose access to all Premium features and your data cannot be recovered.</div>
+      </div>
+      <button onclick="showToast('Data deletion request submitted. You will receive a confirmation email within 24 hours.');closeDeleteModal();"
+              style="width:100%;padding:15px;border:none;border-radius:var(--radius-sm);cursor:pointer;background:var(--red);color:white;font-size:15px;font-weight:600;font-family:var(--font);margin-bottom:10px;transition:opacity 0.15s;">
+        Yes, Delete Everything
+      </button>
+      <button onclick="closeDeleteModal()" style="width:100%;padding:13px;border:none;background:var(--card2);border-radius:var(--radius-sm);color:var(--text2);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- =================== BOTTOM NAV =================== -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showScreen('home')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B93B0" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="nav-label">Home</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-expenses" onclick="showScreen('expenses')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B93B0" stroke-width="1.8">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <div class="nav-label">Expenses</div>
+    </div>
+    <div class="nav-item" id="nav-maintenance" onclick="showScreen('maintenance')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B93B0" stroke-width="1.8">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </div>
+      <div class="nav-label">Maintenance</div>
+    </div>
+    <div class="nav-item" id="nav-reports" onclick="showScreen('reports')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B93B0" stroke-width="1.8">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      </div>
+      <div class="nav-label">Reports</div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showScreen('profile')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B93B0" stroke-width="1.8">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="openAddExpense()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ADD EXPENSE MODAL -->
+  <div class="modal-overlay" id="addExpenseModal" onclick="handleModalClose(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      
+      <!-- Normal Form State -->
+      <div id="expenseFormState">
+        <div class="modal-title">Add Expense</div>
+
+      <div class="form-group">
+        <label class="form-label">Amount</label>
+        <div class="amount-input-wrap">
+          <span class="currency-prefix">AED</span>
+          <input class="amount-input" type="number" placeholder="0" id="expAmount" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+      </div>
+      <div class="cat-grid" id="catGrid">
+        <div class="cat-item selected" onclick="selectCat(this)"><div class="cat-item-icon">⛽</div><div class="cat-item-label">Fuel</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🔧</div><div class="cat-item-label">Maintenance</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🛞</div><div class="cat-item-label">Tyres</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🛣️</div><div class="cat-item-label">Toll</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🧼</div><div class="cat-item-label">Car Wash</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🛡️</div><div class="cat-item-label">Insurance</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">⚠️</div><div class="cat-item-label">Fine</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🔩</div><div class="cat-item-label">Parts</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🔋</div><div class="cat-item-label">Battery</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🪟</div><div class="cat-item-label">Tinting</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">🛢️</div><div class="cat-item-label">Oil Change</div></div>
+        <div class="cat-item" onclick="selectCat(this)"><div class="cat-item-icon">📦</div><div class="cat-item-label">Other</div></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vehicle</label>
+        <select class="text-input" style="appearance:none;">
+          <option>🚗 BMW X5 — DXB·A1234</option>
+          <option>🚙 Toyota Land Cruiser — DXB·B5678</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="text-input" type="date" id="expDate">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Odometer (km) <span style="color:var(--text3);font-weight:400">Optional</span></label>
+        <input class="text-input" type="number" placeholder="e.g. 87420" inputmode="numeric">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes <span style="color:var(--text3);font-weight:400">Optional</span></label>
+        <input class="text-input" type="text" placeholder="Vendor, notes...">
+      </div>
+
+      <div class="form-group" style="padding-bottom:0">
+        <label class="form-label">Receipt</label>
+        <div onclick="showToast('Camera opened')" style="border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;">
+          <div style="font-size:24px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px;color:var(--text3)">Tap to upload receipt</div>
+        </div>
+      </div>
+
+      <div style="height:20px"></div>
+      <button class="submit-btn" onclick="saveExpense()">
+        <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Expense
+        </span>
+      </button>
+      <div style="height:16px"></div>
+      </div>
+
+      <!-- Success State (Hidden by default) -->
+      <div id="expenseSuccessState" style="display:none;text-align:center;padding:40px 20px;">
+        <div class="success-icon-anim" style="width:80px;height:80px;background:var(--green-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px;">Expense Saved!</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:32px;">Your dashboard has been updated with the new entry.</div>
+        <button class="submit-btn" onclick="closeAddExpense()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text)">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ============ NAVIGATION ============
+const screens = ['home','expenses','maintenance','reports','vehicles','profile','receipt','privacy','terms','data-permissions','documents'];
+
+function showScreen(name) {
+  screens.forEach(s => {
+    document.getElementById('screen-'+s)?.classList.remove('active');
+    document.getElementById('nav-'+s)?.classList.remove('active');
+    const navSvg = document.querySelector('#nav-'+s+' svg');
+    if (navSvg) navSvg.style.stroke = '#8B93B0';
+  });
+  document.getElementById('screen-'+name)?.classList.add('active');
+  document.getElementById('nav-'+name)?.classList.add('active');
+  const activeSvg = document.querySelector('#nav-'+name+' svg');
+  if (activeSvg) activeSvg.style.stroke = '#6B84FF';
+  const dot = document.querySelector('#nav-'+name+' .nav-dot');
+  document.querySelectorAll('.nav-dot').forEach(d => d.remove());
+  if (document.getElementById('nav-'+name)) {
+    const d = document.createElement('div');
+    d.className = 'nav-dot';
+    document.getElementById('nav-'+name).appendChild(d);
+  }
+}
+
+// ============ MODALS ============
+function openAddExpense() {
+  document.getElementById('addExpenseModal').classList.add('open');
+  document.getElementById('expDate').valueAsDate = new Date();
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expAmount').focus();
+}
+function closeAddExpense() {
+  document.getElementById('addExpenseModal').classList.remove('open');
+  setTimeout(() => {
+    document.getElementById('expenseFormState').style.display = 'block';
+    document.getElementById('expenseSuccessState').style.display = 'none';
+  }, 300);
+}
+function handleModalClose(e) {
+  if (e.target === document.getElementById('addExpenseModal')) closeAddExpense();
+}
+
+// ============ CATEGORY SELECT ============
+function selectCat(el) {
+  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ============ SAVE EXPENSE ============
+function saveExpense() {
+  const amtInput = document.getElementById('expAmount');
+  const amt = amtInput.value;
+  
+  if (!amt || parseFloat(amt) <= 0) {
+    amtInput.style.animation = 'shake 0.4s ease';
+    amtInput.parentElement.style.borderColor = 'var(--red)';
+    setTimeout(() => {
+      amtInput.style.animation = '';
+      amtInput.parentElement.style.borderColor = '';
+    }, 400);
+    showToast('Please enter a valid amount');
+    return;
+  }
+
+  // Show success state
+  document.getElementById('expenseFormState').style.display = 'none';
+  document.getElementById('expenseSuccessState').style.display = 'block';
+  
+  // Trigger number animation on home screen if we were there
+  if (typeof animateNumbers === 'function') setTimeout(animateNumbers, 500);
+  
+  showToast('Expense saved! AED ' + parseFloat(amt).toFixed(2));
+}
+
+function closeAddExpense() {
+  document.getElementById('addExpenseModal').classList.remove('open');
+  // Reset state after transition
+  setTimeout(() => {
+    document.getElementById('expenseFormState').style.display = 'block';
+    document.getElementById('expenseSuccessState').style.display = 'none';
+  }, 300);
+}
+
+// ============ SWITCH ============
+function toggleSwitch(id) {
+  document.getElementById(id).classList.toggle('on');
+}
+
+// ============ TOAST ============
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+
+// ============ DELETE DATA MODAL ============
+function showDeleteDataModal() {
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+
+function showAddVehicle() { showToast('Add vehicle flow'); }
+
+// ============ RECEIPT SCREEN ============
+let rStep = 1, rOcrTimer = null, rCurrentVat = 5, rOcrFailed = false;
+
+function rGoStep(n) {
+  rStep = n;
+  ['rstep1','rstep2','rstep3'].forEach((id,i)=>{
+    document.getElementById(id).style.display = (i+1===n)?'block':'none';
+  });
+  const labels = ['Upload receipt image','AI processing receipt…','Review & confirm details'];
+  const badges = ['Step 1 of 3','Step 2 of 3','Step 3 of 3'];
+  const btns   = ['Upload Receipt','Processing…','Save Expense'];
+  document.getElementById('rStepLabel').textContent  = labels[n-1];
+  document.getElementById('rStepBadge').textContent  = badges[n-1];
+  document.getElementById('rPrimaryLabel').textContent = btns[n-1];
+  document.getElementById('rPrimaryBtn').disabled = (n===2);
+  // Dots
+  const dotCfg = [
+    ['flex:2;background:linear-gradient(90deg,#6C7CFF,var(--accent));box-shadow:0 0 8px rgba(108,124,255,0.5);','flex:1;background:rgba(255,255,255,0.1);','flex:1;background:rgba(255,255,255,0.1);'],
+    ['flex:1;background:var(--green);','flex:2;background:linear-gradient(90deg,#6C7CFF,var(--accent));box-shadow:0 0 8px rgba(108,124,255,0.5);','flex:1;background:rgba(255,255,255,0.1);'],
+    ['flex:1;background:var(--green);','flex:1;background:var(--green);','flex:2;background:linear-gradient(90deg,#6C7CFF,var(--accent));box-shadow:0 0 8px rgba(108,124,255,0.5);'],
+  ][n-1];
+  ['rdot1','rdot2','rdot3'].forEach((id,i)=>{
+    document.getElementById(id).style.cssText=dotCfg[i]+'height:3px;border-radius:2px;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);';
+  });
+  document.getElementById('rScroll').scrollTop=0;
+}
+
+function rTriggerUpload() { document.getElementById('rFileInput').click(); }
+function rHandleFile(e)   { const f=e.target.files?e.target.files[0]:null; if(f) rStartProcessing(f.name); }
+
+function rSimulateUpload(src) {
+  const names={whatsapp:'WhatsApp_receipt_20032026.jpg',camera:'receipt_photo.jpg',files:'invoice_alfuttaim.pdf'};
+  rStartProcessing(names[src]||'receipt.jpg');
+}
+
+function rStartProcessing(filename) {
+  rOcrFailed = false;
+  document.getElementById('rErrorCard').style.display='none';
+  document.getElementById('rOcrBar').style.width='0%';
+  ['ros1','ros2','ros3','ros4'].forEach(id=>{ document.getElementById(id).className='rocr-step'; });
+  document.getElementById('ros1').className='rocr-step active';
+  document.getElementById('rThumbName').textContent  = filename;
+  document.getElementById('rThumbName2').textContent = filename;
+  rGoStep(2);
+  // 15% chance of simulated OCR failure for demo
+  const willFail = filename.includes('blurry') || Math.random() < 0.0;
+  rRunOCR(willFail);
+}
+
+function rRunOCR(fail) {
+  const bar  = document.getElementById('rOcrBar');
+  const sub  = document.getElementById('rOcrSub');
+  const ids  = ['ros1','ros2','ros3','ros4'];
+  const subs = ['Detecting receipt layout…','Extracting text & numbers…','Identifying supplier & amounts…','Suggesting expense category…'];
+  const pcts = [20, 48, 76, 100];
+  let phase  = 0;
+
+  function next() {
+    if (phase>=ids.length) {
+      if (fail) { rShowError(); return; }
+      setTimeout(()=>rGoStep(3), 400);
+      return;
+    }
+    if (phase>0) {
+      const p = document.getElementById(ids[phase-1]);
+      p.className='rocr-step done';
+    }
+    document.getElementById(ids[phase]).className='rocr-step active';
+    sub.textContent = subs[phase];
+    bar.style.width = pcts[phase]+'%';
+    phase++;
+    rOcrTimer = setTimeout(next, phase===4&&fail ? 400 : 820);
+  }
+  next();
+}
+
+function rShowError() {
+  document.getElementById('rErrorCard').style.display='block';
+  document.getElementById('rOcrBar').style.background='var(--red)';
+  document.getElementById('rOcrSub').textContent='Unable to read receipt';
+  document.getElementById('rPrimaryBtn').disabled=false;
+  document.getElementById('rPrimaryLabel').textContent='Try Again';
+}
+
+function rSkipOCR() {
+  // Go to review form with empty/manual fields
+  document.getElementById('rThumbName2').textContent='Manual entry';
+  document.getElementById('rOcrQuality').textContent='Manual entry — no AI pre-fill';
+  document.getElementById('rStatusChip').textContent='Manual';
+  document.getElementById('rStatusChip').style.cssText='font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-bg);border:0.5px solid rgba(240,168,50,0.2);padding:3px 8px;border-radius:100px;';
+  // Clear AI-filled fields
+  ['rAmt','rSupplier','rInvNum'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.style.background='var(--card2)';el.style.borderColor='var(--border2)';}
+  });
+  ['rTxDate','rInvDate'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.style.background='var(--card2)';el.style.borderColor='var(--border2)';}
+  });
+  document.querySelectorAll('[id="rAmtAiTag"]').forEach(el=>el.style.display='none');
+  rGoStep(3);
+}
+
+function rSelectCat(el, name) {
+  document.querySelectorAll('#rCatGrid .cat-item').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('rCatSelect').value = name;
+}
+
+function rSyncCatFromDropdown(val) {
+  document.querySelectorAll('#rCatGrid .cat-item').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.cat===val);
+  });
+}
+
+function rSetVat(val) {
+  document.querySelectorAll('.vat-pill').forEach(p=>{
+    const isActive = (p.textContent.trim()===val+'%') || (val==='custom'&&p.textContent.trim()==='Custom');
+    p.style.cssText = isActive
+      ? 'padding:7px 14px;border-radius:100px;border:0.5px solid rgba(108,124,255,0.4);background:rgba(108,124,255,0.12);font-size:13px;font-weight:600;color:var(--accent2);cursor:pointer;transition:all 0.18s;'
+      : 'padding:7px 14px;border-radius:100px;border:0.5px solid var(--border2);background:var(--card2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s;';
+  });
+  const customWrap = document.getElementById('rCustomVatWrap');
+  if (val==='custom') { customWrap.style.display='block'; return; }
+  customWrap.style.display='none';
+  rCurrentVat = parseFloat(val);
+  document.getElementById('rVatPct') && (document.getElementById('rVatPct').value=val);
+  rRecalcVat();
+}
+
+function rRecalcVat() {
+  const total   = parseFloat(document.getElementById('rAmt').value)||0;
+  const pctEl   = document.getElementById('rVatPct');
+  const pct     = pctEl ? (parseFloat(pctEl.value)||rCurrentVat) : rCurrentVat;
+  const vatAmt  = total - total/(1+pct/100);
+  const exVat   = total - vatAmt;
+  const vatEl   = document.getElementById('rVatAmt');
+  const exEl    = document.getElementById('rAmtEx');
+  if(vatEl) vatEl.value = vatAmt.toFixed(2);
+  if(exEl)  exEl.value  = exVat.toFixed(2);
+}
+
+function rToggleVat() {
+  const sw = document.getElementById('rVatSwitch');
+  const fv = document.getElementById('rVatFields');
+  sw.classList.toggle('on');
+  fv.style.display = sw.classList.contains('on') ? 'block' : 'none';
+}
+
+function rHandlePrimary() {
+  if (rStep===1) { rTriggerUpload(); return; }
+  if (rStep===2 && rOcrFailed) { rGoStep(1); return; }
+  if (rStep===3) {
+    const amt = document.getElementById('rAmt');
+    if (!amt||!parseFloat(amt.value)) {
+      showToast('Please enter the total amount');
+      amt && amt.focus(); return;
+    }
+    const btn = document.getElementById('rPrimaryBtn');
+    btn.disabled=true;
+    document.getElementById('rPrimaryLabel').textContent='Saving…';
+    setTimeout(()=>{
+      showToast('✓ Receipt expense saved!');
+      setTimeout(()=>{
+        btn.disabled=false;
+        document.getElementById('rPrimaryLabel').textContent='Upload Receipt';
+        rGoStep(1);
+        showScreen('home');
+      },1500);
+    },950);
+  }
+}
+
+function rHandleDiscard() {
+  clearTimeout(rOcrTimer);
+  rGoStep(1);
+  if(rStep<=1) showScreen('home');
+}
+
+function receiptBack() {
+  if(rStep>1){ clearTimeout(rOcrTimer); rGoStep(rStep-1); }
+  else showScreen('home');
+}
+
+// ============ CHARTS ============
+document.addEventListener('DOMContentLoaded', () => {
+  // Spending trend (home)
+  const spendCtx = document.getElementById('spendChart');
+  if (spendCtx) {
+
+    // Build a vertical gradient for the active (current month) bar
+    const spendCanvas = spendCtx;
+    const spendGl = spendCanvas.getContext('2d');
+
+    // Glow plugin — draws a soft bloom behind the active bar after each render
+    const glowPlugin = {
+      id: 'activeBarGlow',
+      afterDatasetsDraw(chart) {
+        const { ctx, data, scales: { x, y } } = chart;
+        const activeIdx = data.datasets[0].data.length - 1;
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[activeIdx];
+        if (!bar) return;
+        const bx = bar.x, by = bar.y, bw = bar.width, bh = y.getPixelForValue(0) - by;
+        // layered radial glow centred on the bar
+        const cx = bx, cy = by + bh * 0.35;
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, bw * 2.2);
+        grad.addColorStop(0,   'rgba(108,124,255,0.2)');
+        grad.addColorStop(0.5, 'rgba(76,90,230,0.07)');
+        grad.addColorStop(1,   'rgba(76,90,230,0)');
+        ctx.save();
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, bw * 2.2, bh * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    };
+
+    new Chart(spendCtx, {
+      type: 'bar',
+      plugins: [glowPlugin],
+      data: {
+        labels: ['Oct','Nov','Dec','Jan','Feb','Mar'],
+        datasets: [{
+          label: 'Spend',
+          data: [4200, 3800, 5100, 6200, 5600, 2847],
+          backgroundColor: (ctx) => {
+            const i = ctx.dataIndex;
+            const chart = ctx.chart;
+            const { chartArea } = chart;
+            if (!chartArea) return i === 5 ? '#4C5AE6' : 'rgba(108,124,255,0.18)';
+            const grad = spendGl.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            if (i === 5) {
+              grad.addColorStop(0, '#6C7CFF');
+              grad.addColorStop(1, '#4C5AE6');
+            } else {
+              grad.addColorStop(0, 'rgba(108,124,255,0.22)');
+              grad.addColorStop(1, 'rgba(76,90,230,0.14)');
+            }
+            return grad;
+          },
+          hoverBackgroundColor: (ctx) => {
+            const i = ctx.dataIndex;
+            const chart = ctx.chart;
+            const { chartArea } = chart;
+            if (!chartArea) return i === 5 ? '#8090FF' : 'rgba(108,124,255,0.32)';
+            const grad = spendGl.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            if (i === 5) {
+              grad.addColorStop(0, '#8090FF');
+              grad.addColorStop(1, '#5C6CF0');
+            } else {
+              grad.addColorStop(0, 'rgba(108,124,255,0.34)');
+              grad.addColorStop(1, 'rgba(76,90,230,0.24)');
+            }
+            return grad;
+          },
+          borderRadius: 7,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: {
+          duration: 900,
+          easing: 'easeOutQuart',
+          delay: (ctx) => ctx.type === 'data' && ctx.mode === 'default' ? ctx.dataIndex * 60 : 0,
+        },
+        plugins: { legend: { display: false }, tooltip: {
+          backgroundColor: 'rgba(18,22,40,0.82)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+          padding: { top: 7, bottom: 7, left: 10, right: 10 },
+          titleColor: '#8E97B4', titleFont: { size: 11, weight: '400' },
+          bodyColor: '#F0F2FA', bodyFont: { size: 13, weight: '600' },
+          callbacks: { label: (c) => 'AED ' + c.raw.toLocaleString() }
+        }},
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#5A6180', font: { size: 12 } }, border: { display: false } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5A6180', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Trend chart (reports)
+  const trendCtx = document.getElementById('trendChart');
+  if (trendCtx) {
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+          label: 'BMW X5',
+          data: [5800,6200,6400,null,null,null,null,null,null,null,null,null],
+          borderColor: '#4F6EF7', backgroundColor: 'rgba(79,110,247,0.1)',
+          tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4F6EF7',
+          borderWidth: 2
+        },{
+          label: 'Toyota LC',
+          data: [7100,7400,8000,null,null,null,null,null,null,null,null,null],
+          borderColor: '#1EC46E', backgroundColor: 'rgba(30,196,110,0.08)',
+          tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#1EC46E',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          backgroundColor: 'rgba(18,22,40,0.82)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+          padding: { top: 7, bottom: 7, left: 10, right: 10 },
+          titleColor: '#8E97B4', titleFont: { size: 11, weight: '400' },
+          bodyColor: '#F0F2FA', bodyFont: { size: 13, weight: '600' },
+          callbacks: { label: c => c.dataset.label + ': AED ' + (c.raw||0).toLocaleString() }
+        }},
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#5A6180', font: { size: 11 } }, border: { display: false } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5A6180', font: { size: 11 }, callback: v => 'AED ' + (v/1000).toFixed(0) + 'k' }, border: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Donut
+  const donutCtx = document.getElementById('donutChart');
+  if (donutCtx) {
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [43, 27, 17, 8, 5],
+          backgroundColor: ['#F0A832','#4F6EF7','#A855F7','#22D4D4','#5A6180'],
+          borderWidth: 0, hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: {
+          backgroundColor: 'rgba(18,22,40,0.82)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+          padding: { top: 7, bottom: 7, left: 10, right: 10 },
+          titleColor: '#8E97B4', titleFont: { size: 11, weight: '400' },
+          bodyColor: '#F0F2FA', bodyFont: { size: 13, weight: '600' },
+          callbacks: { label: c => c.raw + '%' }
+        }}
+      }
+    });
+  }
+});
+
+// ============ COUNT-UP ANIMATION ============
+function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+function countUp(el, target, duration, prefix, suffix, decimals) {
+  const start = performance.now();
+  const isFloat = decimals > 0;
+  function frame(now) {
+    const elapsed = Math.min((now - start) / duration, 1);
+    const ease = easeOutQuart(elapsed);
+    const val = target * ease;
+    const formatted = isFloat ? val.toFixed(decimals) : Math.round(val).toLocaleString();
+    el.textContent = prefix + formatted + suffix;
+    if (elapsed < 1) requestAnimationFrame(frame);
+    else el.textContent = prefix + (isFloat ? target.toFixed(decimals) : Math.round(target).toLocaleString()) + suffix;
+  }
+  requestAnimationFrame(frame);
+}
+
+// Parse a display value into { prefix, num, suffix, decimals }
+function parseVal(text) {
+  text = text.trim();
+  const m = text.match(/^([^0-9\-]*)(-?[0-9,]+(?:\.[0-9]+)?)(k?)([^0-9]*)$/);
+  if (!m) return null;
+  const prefix = m[1];
+  const isK = m[3] === 'k';
+  // Strip thousands commas before parsing — commas are never decimal separators
+  const clean = m[2].replace(/,/g, '');
+  const rawNum = parseFloat(clean);
+  const suffix = isK ? 'k' + m[4] : m[4];
+  // Only count decimal places if there's an actual dot in the original string
+  const dotIdx = m[2].indexOf('.');
+  const decimals = dotIdx !== -1 ? m[2].length - dotIdx - 1 : 0;
+  if (isK) {
+    return { prefix, num: rawNum, suffix, decimals: decimals || 1 };
+  }
+  return { prefix, num: rawNum, suffix, decimals };
+}
+
+function animateNumbers(container) {
+  const selectors = ['.kpi-value','.rs-value','.vc-stat-val','.spark-val','.exp-amount'];
+  selectors.forEach(sel => {
+    container.querySelectorAll(sel).forEach(el => {
+      const parsed = parseVal(el.textContent);
+      if (!parsed || parsed.num === 0) return;
+      const dur = 900 + Math.random() * 300;
+      countUp(el, parsed.num, dur, parsed.prefix, parsed.suffix, parsed.decimals);
+    });
+  });
+}
+
+// Hook into screen switches
+const _origShow = window.showScreen;
+window.showScreen = function(name) {
+  _origShow(name);
+  const screen = document.getElementById('screen-' + name);
+  if (screen) setTimeout(() => animateNumbers(screen), 80);
+};
+
+// Run on initial load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => animateNumbers(document.getElementById('screen-home')), 300);
+});
+</script>
+</body>
+</html>
