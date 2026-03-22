@@ -1360,7 +1360,7 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
             <div class="intro-tag">Welcome to AutoTrack</div>
             <h1 class="intro-title">Your car's <span>financial brain</span></h1>
             <p class="intro-desc">Track every dirham spent on your vehicles. Smart insights. Zero effort.</p>
-            <button class="intro-btn" onclick="nextIntro(2)">Get Started <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            <button class="intro-btn" onclick="startWizard()">Get Started <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
           </div>
         </div>
 
@@ -4317,11 +4317,16 @@ function nextIntro(n) {
 function startWizard() {
   // Hide all intros
   document.querySelectorAll('.intro-slide').forEach(s => {
-    s.classList.remove('active');
+    s.classList.remove('active', 'prev');
     s.style.display = 'none';
   });
   // Show wizard
   document.getElementById('wizard-container').style.display = 'flex';
+  
+  // Ensure we start at Step 1
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wizard-1').classList.add('active');
+  updateWizardProgress(1);
 }
 
 function selectType(type, el) {
