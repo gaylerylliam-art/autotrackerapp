@@ -12,17 +12,17 @@
   --bg2: #161B2C;
   --bg3: #1A1F2E;
   --bg4: #252A3D;
-  --card: rgba(22, 27, 44, 0.45);
-  --card2: rgba(26, 32, 53, 0.6);
+  --card: rgba(22, 27, 44, 0.4);
+  --card2: rgba(26, 32, 53, 0.5);
   --border: rgba(255,255,255,0.06);
   --border2: rgba(255,255,255,0.1);
   --text: #FFFFFF;
-  --text2: #B0B8D9;
-  --text3: #8E97B4;
-  --accent: #E17F44;
-  --accent2: #F0A372;
-  --accent-glow: rgba(225, 127, 68, 0.3);
-  --purple: #43256E;
+  --text2: #D1D8F0;
+  --text3: #A0ACC0;
+  --accent: #7C4DFF;
+  --accent-light: #448AFF;
+  --accent-gradient: linear-gradient(135deg, #7C4DFF 0%, #448AFF 100%);
+  --accent-glow: rgba(124, 77, 255, 0.3);
   --purple-bg: rgba(67, 37, 110, 0.15);
   --red: #F04E5E;
   --red-bg: rgba(240,78,94,0.1);
@@ -128,10 +128,9 @@
 }
   body {
     background-color: var(--bg);
-    background-image:
-      radial-gradient(circle at 50% -10%, rgba(225, 127, 68, 0.18) 0%, transparent 45%),
-      radial-gradient(circle at 100% 60%, rgba(67, 37, 110, 0.12) 0%, transparent 40%),
-      radial-gradient(circle at 0% 40%, rgba(225, 127, 68, 0.05) 0%, transparent 30%),
+    background-image: 
+      radial-gradient(circle at 85% 5%, rgba(124, 77, 255, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 15% 40%, rgba(68, 138, 255, 0.1) 0%, transparent 35%),
       radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
       radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
       radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
@@ -247,23 +246,29 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   width: 16px; height: 3px; border-radius: 2px;
   background: linear-gradient(90deg, #6C7CFF, #7B5EFF);
   box-shadow: 0 0 6px rgba(108,124,255,0.6);
-  position: absolute; bottom: 4px;
+  display: flex; flex-direction: column; align-items: center;
+  color: var(--text3); opacity: 0.7; font-size: 10px; font-weight: 500;
+  cursor: pointer; transition: all 0.25s ease;
+  padding: 4px 8px;
 }
+.nav-item i { font-size: 20px; margin-bottom: 2px; transition: transform 0.25s ease; }
+.nav-item.active { color: var(--accent-light); opacity: 1; font-weight: 600; }
+.nav-item.active i { transform: translateY(-2px); }
+.nav-item:not(.active):hover { opacity: 0.9; color: var(--text2); }
 
 /* FAB */
-.fab {
-  position: absolute; bottom: calc(var(--nav-h) + 36px); right: 20px;
-  width: 50px; height: 50px; border-radius: 50%;
-  background: linear-gradient(135deg, #6C7CFF, #7B5EFF);
+.add-expense-btn {
+  position: fixed; bottom: 84px; right: 18px;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent-gradient);
+  color: white; border: none;
+  box-shadow: 0 8px 16px rgba(124, 77, 255, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 6px 20px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2);
-  transition: transform 0.15s, box-shadow 0.15s; z-index: 100;
-  border: 0.5px solid rgba(108,124,255,0.4);
+  z-index: 900; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.fab:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--accent-glow); }
-.fab:active { transform: scale(0.93); box-shadow: 0 3px 10px var(--accent-glow); }
-.fab svg { width: 20px; height: 20px; stroke: white; stroke-width: 2.5; }
+.add-expense-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 12px 24px rgba(124, 77, 255, 0.5); }
+.add-expense-btn:active { transform: scale(0.92); }
 
 /* ── ELEVATION / DEPTH SYSTEM ──
    Level 0 = page bg
@@ -284,24 +289,34 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
 /* CARDS — level 2 */
   .card {
     background: var(--card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: var(--radius);
     padding: 16px;
-    margin-bottom: 20px;
-    transition: transform 0.2s;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    margin-bottom: 16px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 4px 24px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+    border-radius: inherit;
   }
   .card-sm {
     background: var(--card);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: var(--radius-sm);
     padding: 12px;
     margin-bottom: 12px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
 /* QUICK ACTION CARDS */
@@ -347,8 +362,20 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
   position:absolute; inset:0; border-radius: inherit; opacity:0.03;
   background-image: var(--noise); background-size: 160px 160px;
 }
-.kpi-label { font-size: 10px; color: var(--text3); font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; margin-bottom: 10px; }
-.kpi-value { font-family: var(--font-num); font-size: 27px; font-weight: 600; color: var(--text); line-height: 1; letter-spacing: -0.4px; font-variant-numeric: tabular-nums; font-feature-settings: var(--tnum); }
+.section-header h2 {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 12px; margin-left: 4px;
+}
+.kpi-label {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 28px; font-weight: 800; color: var(--text);
+  line-height: 1.1; margin-bottom: 2px;
+}
 .kpi-sub { font-size: 11px; color: var(--text2); font-weight: 400; margin-top: 5px; }
 .kpi-trend { font-size: 11px; font-weight: 500; margin-top: 5px; font-variant-numeric: tabular-nums; }
 .kpi-trend.up { color: var(--green); }
@@ -1014,10 +1041,252 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
             <span style="color:var(--amber);font-size:13px;">●</span> Files / PDF
           </div>
           <div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);">JPG · PNG · PDF</div>
+  </div>
+
+  <!-- Home Screen -->
+    <div id="screen-home" class="screen active">
+      <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
+        <div class="onboarding-card card">
+          <div class="onboarding-header">
+            <div class="onboarding-icon"><i class="fas fa-rocket"></i></div>
+            <h3>Welcome to AutoTrack</h3>
+            <p>Let's get your vehicle profile set up in seconds.</p>
+          </div>
+          <div class="onboarding-steps">
+            <div class="onboarding-step active" onclick="showScreen('vehicles')">
+              <div class="step-num">1</div>
+              <div class="step-text">Add your first vehicle</div>
+            </div>
+            <div class="onboarding-step" onclick="openAddExpense()">
+              <div class="step-num">2</div>
+              <div class="step-text">Record your first expense</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="closeOnboarding()">Explore Dashboard</button>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <div class="topbar-action" onclick="showScreen('settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.35a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 1-1 1.73l-.15.08a2 2 0 0 0-.73 2.73l.78 1.35a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.35a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.44a2 2 0 0 1 1-1.73l.15-.08a2 2 0 0 0 .73-2.73l-.78-1.35a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div style="text-align:center;">
+          <div class="topbar-title">Dashboard</div>
+          <div style="font-size:9px; color:var(--accent-light); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:-2px;">Fleet Mode Active</div>
+        </div>
+        <div class="topbar-action" onclick="openAddExpense()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+      </div>
+
+      <div class="scroll-content">
+        <!-- Vehicle Selector -->
+        <div class="vehicle-selector">
+          <div class="vehicle-chip active" onclick="switchVehicle(this)">
+            <span class="vehicle-chip-icon">🚗</span>
+            <span class="vehicle-chip-name">BMW X5</span>
+            <span class="vehicle-chip-plate">DXB•A1234</span>
+          </div>
+          <div class="vehicle-chip" onclick="switchVehicle(this)">
+            <span class="vehicle-chip-icon">🚙</span>
+            <span class="vehicle-chip-name">Toyota LC</span>
+            <span class="vehicle-chip-plate">DXB•B5678</span>
+          </div>
+          <div class="vehicle-chip" onclick="showAddVehicle()">
+            <span style="font-size:18px; color:var(--accent2)">＋</span>
+            <span class="vehicle-chip-name" style="color:var(--accent2)">Add</span>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">This Month</div>
+            <div class="kpi-value">AED 2.8k</div>
+            <div class="kpi-trend up">↑ 12% vs last</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Cost / km</div>
+            <div class="kpi-value">AED 0.94</div>
+            <div class="kpi-trend down">↓ 5% improved</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Odometer</div>
+            <div class="kpi-value">87,420</div>
+            <div class="kpi-sub">km recorded</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">YTD Total</div>
+            <div class="kpi-value">AED 18.2k</div>
+            <div class="kpi-sub">Jan – Mar 2026</div>
+          </div>
+        </div>
+
+        <!-- Spending Chart -->
+        <div class="sec-header" style="padding-top:44px"><div class="sec-title">Spending Trend</div><div class="sec-link">6 months</div></div>
+        <div class="chart-wrap">
+          <div class="chart-inner"><canvas id="spendChart"></canvas></div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="sec-header"><div class="sec-title">Alerts</div><div class="sec-link" onclick="showScreen('maintenance')">See all</div></div>
+        <div id="alerts-container">
+          <div class="alert-card danger" id="alert-1">
+            <div class="alert-icon">⚙️</div>
+            <div>
+              <div class="alert-title">Oil Change Overdue</div>
+              <div class="alert-sub">BMW X5 · 850 km overdue</div>
+            </div>
+            <div class="alert-badge" onclick="resolveAlert(1, event)" style="cursor:pointer;background:var(--red-bg);border:1px solid var(--red);">Resolve</div>
+          </div>
+          <div class="alert-card warn" id="alert-2">
+            <div class="alert-icon">🛡️</div>
+            <div>
+              <div class="alert-title">Insurance Expires Soon</div>
+              <div class="alert-sub">BMW X5 · 18 days remaining</div>
+            </div>
+            <div class="alert-badge" onclick="resolveAlert(2, event)" style="cursor:pointer;background:var(--amber-bg);border:1px solid var(--amber);">Mark Done</div>
+          </div>
+        </div>
+        <div class="alert-card info" onclick="showScreen('maintenance')">
+          <div class="alert-icon">🚗</div>
+          <div>
+            <div class="alert-title">Registration Due</div>
+            <div class="alert-sub">Toyota LC · 45 days remaining</div>
+          </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="sec-header"><div class="sec-title">Recent Expenses</div><div class="sec-link" onclick="showScreen('expenses')">View all</div></div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div class="expense-row">
+            <div class="exp-icon" style="background:rgba(255,184,63,0.12)">⛽</div>
+            <div class="exp-info"><div class="exp-name">ADNOC Station</div><div class="exp-meta">Fuel · Today</div></div>
+            <div class="exp-amount neg">−AED 180</div>
+          </div>
+          <div class="expense-row">
+            <div class="exp-icon" style="background:rgba(79,110,247,0.12)">🔧</div>
+            <div class="exp-info"><div class="exp-name">Al Futtaim Auto</div><div class="exp-meta">Maintenance · Yesterday</div></div>
+            <div class="exp-amount neg">−AED 450</div>
+          </div>
+          <div class="expense-row">
+            <div class="exp-icon" style="background:rgba(34,212,212,0.12)">🛣️</div>
+            <div class="exp-info"><div class="exp-name">Salik Toll</div><div class="exp-meta">Toll · Mar 18</div></div>
+            <div class="exp-amount neg">−AED 16</div>
+          </div>
+          <div class="expense-row">
+            <div class="exp-icon" style="background:rgba(168,85,247,0.12)">🧼</div>
+            <div class="exp-info"><div class="exp-name">Premium Car Wash</div><div class="exp-meta">Car Wash · Mar 16</div></div>
+            <div class="exp-amount neg">−AED 60</div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Sparklines -->
+        <div class="sec-header"><div class="sec-title">By Category</div><div class="sec-link" style="color:var(--text3);font-size:11px;cursor:default">AED · this month</div></div>
+        <div class="card" style="padding:12px 4px;">
+          <div class="sparkline-wrap">
+            <div class="spark-label">⛽ Fuel</div>
+            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:72%;background:var(--amber)"></div></div>
+            <div class="spark-val">1.2k</div>
+          </div>
+          <div class="sparkline-wrap">
+            <div class="spark-label">🔧 Maintenance</div>
+            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:45%;background:var(--accent)"></div></div>
+            <div class="spark-val">760</div>
+          </div>
+          <div class="sparkline-wrap">
+            <div class="spark-label">🛡️ Insurance</div>
+            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:28%;background:var(--purple)"></div></div>
+            <div class="spark-val">480</div>
+          </div>
+          <div class="sparkline-wrap">
+            <div class="spark-label">🛣️ Toll</div>
+            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:14%;background:var(--teal)"></div></div>
+            <div class="spark-val">240</div>
+          </div>
+          <div class="sparkline-wrap">
+            <div class="spark-label">🧼 Other</div>
+            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:8%;background:var(--text3)"></div></div>
+            <div class="spark-val">127</div>
+          </div>
+        </div>
+
+        <!-- AI Smart Insights -->
+        <div class="sec-header"><div class="sec-title">Smart Insights</div></div>
+        <div class="card ai-insight-card" style="border:1px solid rgba(124, 77, 255, 0.25); background: linear-gradient(135deg, rgba(124, 77, 255, 0.08), transparent);">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <div style="font-size:20px;">💡</div>
+            <div>
+              <div style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px;">Fuel efficiency is up by 12%</div>
+              <div style="font-size:12px; color:var(--text3); line-height:1.5;">Since your last maintenance on BMW X5, your fuel consumption has flattened. Keep it up!</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 10px;">
+          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="openAddExpense()">
+            <div style="font-size:26px;margin-bottom:8px;">➕</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Add Expense</div>
+          </div>
+          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('reports')">
+            <div style="font-size:26px;margin-bottom:8px;">📊</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">View Reports</div>
+          </div>
+          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('maintenance')">
+            <div style="font-size:26px;margin-bottom:8px;">🔔</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Reminders</div>
+          </div>
+          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('documents')">
+            <div style="font-size:26px;margin-bottom:8px;">📁</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Document Vault</div>
+          </div>
+        </div>
+
+        <!-- Receipt Upload — full-width featured card -->
+        <div onclick="showScreen('receipt')" style="margin:0 16px 20px;cursor:pointer;
+          border-radius:var(--radius);overflow:hidden;position:relative;
+          background:linear-gradient(135deg,rgba(108,124,255,0.14) 0%,rgba(123,94,255,0.08) 50%,rgba(168,85,247,0.06) 100%),
+                     linear-gradient(180deg,#1B1F2A 0%,#141824 100%);
+          border:0.5px solid rgba(108,124,255,0.28);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 4px 18px rgba(0,0,0,0.28),0 0 24px rgba(108,124,255,0.07);
+          transition:transform 0.22s cubic-bezier(0.22,1,0.36,1),box-shadow 0.22s,border-color 0.22s;">
+          <!-- glow orb -->
+          <div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;
+                      background:radial-gradient(circle,rgba(108,124,255,0.18),transparent 70%);
+                      pointer-events:none;"></div>
+          <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;">
+            <div style="width:48px;height:48px;border-radius:14px;flex-shrink:0;
+                        background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
+                        border:0.5px solid rgba(108,124,255,0.3);
+                        display:flex;align-items:center;justify-content:center;font-size:22px;">🧾</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <div style="font-size:14px;font-weight:700;color:var(--text);font-family:var(--font-display)">Upload Receipt</div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:0.08em;padding:2px 7px;border-radius:100px;
+                            background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
+                            border:0.5px solid rgba(108,124,255,0.3);color:var(--accent2);">✦ AI OCR</div>
+              </div>
+              <div style="font-size:12px;color:var(--text3);line-height:1.4;">Auto-extract supplier, amount, date &amp; VAT from any receipt</div>
+            </div>
+            <div style="color:var(--accent2);flex-shrink:0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div style="height:0.5px;background:rgba(108,124,255,0.15);margin:0 18px;"></div>
+          <div style="padding:10px 18px;display:flex;gap:14px;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+              <span style="color:#25D366;font-size:13px;">●</span> WhatsApp
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+              <span style="color:var(--accent2);font-size:13px;">●</span> Camera
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
+              <span style="color:var(--amber);font-size:13px;">●</span> Files / PDF
+            </div>
+            <div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);">JPG · PNG · PDF</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
   <!-- =================== RECEIPT UPLOAD SCREEN =================== -->
   <div class="screen" id="screen-receipt">
@@ -2775,6 +3044,22 @@ function handleModalClose(e) {
 }
 
 // ============ CATEGORY SELECT ============
+function switchVehicle(el) {
+  document.querySelectorAll('.vehicle-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  
+  // Trigger KPI re-sync animation
+  document.querySelectorAll('.kpi-card').forEach(k => {
+    k.style.transform = 'scale(0.95)';
+    k.style.opacity = '0.5';
+    setTimeout(() => {
+      k.style.transform = 'scale(1)';
+      k.style.opacity = '1';
+    }, 300);
+  });
+  
+  showToast('Switching to ' + el.querySelector('.vehicle-chip-name').innerText);
+}
 function selectCat(el) {
   document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -2983,6 +3268,27 @@ function rRecalcVat() {
   if(exEl)  exEl.value  = exVat.toFixed(2);
 }
 
+function resolveAlert(id, event) {
+  if(event) event.stopPropagation();
+  const el = document.getElementById(`alert-${id}`);
+  if(el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    setTimeout(() => el.remove(), 300);
+  }
+  showToast('Alert resolved and archived');
+}
+
+function closeOnboarding() {
+  onboardingActive = false;
+  const overlay = document.getElementById('onboarding-overlay');
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    localStorage.setItem('autotrack_returning_user', 'true');
+  }, 400);
+}
+
 function rToggleVat() {
   const sw = document.getElementById('rVatSwitch');
   const fv = document.getElementById('rVatFields');
@@ -3008,7 +3314,11 @@ function rHandlePrimary() {
         btn.disabled=false;
         document.getElementById('rPrimaryLabel').textContent='Upload Receipt';
         rGoStep(1);
-        showScreen('home');
+       let vehicles = [
+      { id: 1, name: 'BMW X5', plate: 'DXB•A1234', mileage: 87420 },
+      { id: 2, name: 'Toyota LC', plate: 'DXB•B5678', mileage: 42100 }
+    ];
+    let currentScreen = 'home';
       },1500);
     },950);
   }
