@@ -1411,11 +1411,12 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
             <span style="color:var(--amber);font-size:13px;">●</span> Files / PDF
           </div>
           <div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);">JPG · PNG · PDF</div>
-  </div>
-
-  <!-- Home Screen -->
-    <div id="screen-home" class="screen active">
-      <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
+        </div> <!-- Close Receipt upload inner Flex -->
+      </div> <!-- Close Receipt upload card -->
+    </div> <!-- Close scroll-content -->
+    
+    <!-- Onboarding Wizard Overlay -->
+    <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
         <!-- Slide 1: Welcome -->
         <div class="intro-slide active" id="intro-1">
           <div class="intro-header">
@@ -1646,202 +1647,9 @@ html, body { height: 100%; overflow: hidden; background: #0B0F1A; font-family: v
                 <button class="intro-btn" onclick="closeOnboarding(); renderDashboard();">Go to Dashboard <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
              </div>
           </div>
-        </div>
-      </div>
-
-      <div class="topbar">
-        <div class="topbar-action" onclick="showScreen('settings')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.35a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 1-1 1.73l-.15.08a2 2 0 0 0-.73 2.73l.78 1.35a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.35a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.44a2 2 0 0 1 1-1.73l.15-.08a2 2 0 0 0 .73-2.73l-.78-1.35a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <div style="text-align:center;">
-          <div class="topbar-title">Dashboard</div>
-          <div onclick="showScreen('fleet')" style="font-size:9px; color:var(--accent2); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:-2px; cursor:pointer;">Fleet Mode Active</div>
-        </div>
-        <div class="topbar-action" onclick="openAddExpense()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-      </div>
-
-      <div class="scroll-content">
-        <!-- Vehicle Selector -->
-        <div class="vehicle-selector" id="vehicle-selector-container">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">This Month</div>
-            <div class="kpi-value">AED 2.8k</div>
-            <div class="kpi-trend up">↑ 12% vs last</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Cost / km</div>
-            <div class="kpi-value">AED 0.94</div>
-            <div class="kpi-trend down">↓ 5% improved</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Odometer</div>
-            <div class="kpi-value">87,420</div>
-            <div class="kpi-sub">km recorded</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">YTD Total</div>
-            <div class="kpi-value">AED 18.2k</div>
-            <div class="kpi-sub">Jan – Mar 2026</div>
-          </div>
-        </div>
-
-        <!-- Spending Chart -->
-        <div class="sec-header" style="padding-top:44px"><div class="sec-title">Spending Trend</div><div class="sec-link">6 months</div></div>
-        <div class="chart-wrap">
-          <div class="chart-inner"><canvas id="spendChart"></canvas></div>
-        </div>
-
-        <!-- Alerts -->
-        <div class="sec-header"><div class="sec-title">Alerts</div><div class="sec-link" onclick="showScreen('maintenance')">See all</div></div>
-        <div id="alerts-container">
-          <div class="alert-card danger" id="alert-1">
-            <div class="alert-icon">⚙️</div>
-            <div>
-              <div class="alert-title">Oil Change Overdue</div>
-              <div class="alert-sub">BMW X5 · 850 km overdue</div>
-            </div>
-            <div class="alert-badge" onclick="resolveAlert(1, event)" style="cursor:pointer;background:var(--red-bg);border:1px solid var(--red);">Resolve</div>
-          </div>
-          <div class="alert-card warn" id="alert-2">
-            <div class="alert-icon">🛡️</div>
-            <div>
-              <div class="alert-title">Insurance Expires Soon</div>
-              <div class="alert-sub">BMW X5 · 18 days remaining</div>
-            </div>
-            <div class="alert-badge" onclick="resolveAlert(2, event)" style="cursor:pointer;background:var(--amber-bg);border:1px solid var(--amber);">Mark Done</div>
-          </div>
-        </div>
-        <div class="alert-card info" onclick="showScreen('maintenance')">
-          <div class="alert-icon">🚗</div>
-          <div>
-            <div class="alert-title">Registration Due</div>
-            <div class="alert-sub">Toyota LC · 45 days remaining</div>
-          </div>
-        </div>
-
-        <!-- Recent Expenses -->
-        <div class="sec-header"><div class="sec-title">Recent Expenses</div><div class="sec-link" onclick="showScreen('expenses')">View all</div></div>
-        <div class="card" style="padding:0; overflow:hidden;" id="recent-expenses-list">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- Category Breakdown Sparklines -->
-        <div class="sec-header"><div class="sec-title">By Category</div><div class="sec-link" style="color:var(--text3);font-size:11px;cursor:default">AED · this month</div></div>
-        <div class="card" style="padding:12px 4px;">
-          <div class="sparkline-wrap">
-            <div class="spark-label">⛽ Fuel</div>
-            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:72%;background:var(--amber)"></div></div>
-            <div class="spark-val">1.2k</div>
-          </div>
-          <div class="sparkline-wrap">
-            <div class="spark-label">🔧 Maintenance</div>
-            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:45%;background:var(--accent)"></div></div>
-            <div class="spark-val">760</div>
-          </div>
-          <div class="sparkline-wrap">
-            <div class="spark-label">🛡️ Insurance</div>
-            <div class="spark-bar-wrap"><div class="spark-bar fill-anim" style="width:28%;background:var(--purple)"></div></div>
-            <div class="spark-val">480</div>
-          </div>
-          <div class="sparkline-wrap">
-        <!-- AI Smart Insights -->
-        <div class="sec-header"><div class="sec-title">AI Smart Insights</div><div class="sec-link" onclick="showScreen('reports')">Explore</div></div>
-        <div class="card" style="background:linear-gradient(135deg, var(--bg3), var(--bg2)); border:1px solid rgba(108,124,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.25); cursor:pointer;" onclick="showScreen('reports')">
-          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
-            <div style="width:36px; height:36px; background:var(--accent-glow); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">✨</div>
-            <div>
-              <div style="font-size:14px; font-weight:700; color:var(--text);">Efficiency Analysis</div>
-              <div style="font-size:11px; color:var(--accent2); font-weight:600;">COMPUTED JUST NOW</div>
-            </div>
-          </div>
-          <div style="font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:14px;">
-            Your <span style="color:var(--text); font-weight:600;">BMW X5</span> shows a <span style="color:var(--green); font-weight:700;">12% improvement</span> in fuel efficiency after the last service. Maintenance is paying off!
-          </div>
-          <div style="display:flex; gap:8px;">
-            <div style="flex:1; background:var(--bg3); padding:10px; border-radius:8px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text3); text-transform:uppercase; margin-bottom:2px;">Projected Savings</div>
-              <div style="font-size:14px; font-weight:700; color:var(--green);">AED 420/mo</div>
-            </div>
-            <div style="flex:1; background:var(--bg3); padding:10px; border-radius:8px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text3); text-transform:uppercase; margin-bottom:2px;">Next Service</div>
-              <div style="font-size:14px; font-weight:700; color:var(--amber);">In 1,400 km</div>
-            </div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 10px;">
-          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="openAddExpense()">
-            <div style="font-size:26px;margin-bottom:8px;">➕</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">Add Expense</div>
-          </div>
-          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('reports')">
-            <div style="font-size:26px;margin-bottom:8px;">📊</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">View Reports</div>
-          </div>
-          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('maintenance')">
-            <div style="font-size:26px;margin-bottom:8px;">🔔</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">Reminders</div>
-          </div>
-          <div class="card-sm quick-action" style="cursor:pointer;text-align:center;padding:16px;" onclick="showScreen('documents')">
-            <div style="font-size:26px;margin-bottom:8px;">📁</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">Document Vault</div>
-          </div>
-        </div>
-
-        <!-- Receipt Upload — full-width featured card -->
-        <div onclick="showScreen('receipt')" style="margin:0 16px 20px;cursor:pointer;
-          border-radius:var(--radius);overflow:hidden;position:relative;
-          background:linear-gradient(135deg,rgba(108,124,255,0.14) 0%,rgba(123,94,255,0.08) 50%,rgba(168,85,247,0.06) 100%),
-                     linear-gradient(180deg,#1B1F2A 0%,#141824 100%);
-          border:0.5px solid rgba(108,124,255,0.28);
-          box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 4px 18px rgba(0,0,0,0.28),0 0 24px rgba(108,124,255,0.07);
-          transition:transform 0.22s cubic-bezier(0.22,1,0.36,1),box-shadow 0.22s,border-color 0.22s;">
-          <!-- glow orb -->
-          <div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;
-                      background:radial-gradient(circle,rgba(108,124,255,0.18),transparent 70%);
-                      pointer-events:none;"></div>
-          <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;">
-            <div style="width:48px;height:48px;border-radius:14px;flex-shrink:0;
-                        background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
-                        border:0.5px solid rgba(108,124,255,0.3);
-                        display:flex;align-items:center;justify-content:center;font-size:22px;">🧾</div>
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-                <div style="font-size:14px;font-weight:700;color:var(--text);font-family:var(--font-display)">Upload Receipt</div>
-                <div style="font-size:9px;font-weight:700;letter-spacing:0.08em;padding:2px 7px;border-radius:100px;
-                            background:linear-gradient(135deg,rgba(108,124,255,0.25),rgba(123,94,255,0.15));
-                            border:0.5px solid rgba(108,124,255,0.3);color:var(--accent2);">✦ AI OCR</div>
-              </div>
-              <div style="font-size:12px;color:var(--text3);line-height:1.4;">Auto-extract supplier, amount, date &amp; VAT from any receipt</div>
-            </div>
-            <div style="color:var(--accent2);flex-shrink:0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </div>
-          </div>
-          <div style="height:0.5px;background:rgba(108,124,255,0.15);margin:0 18px;"></div>
-          <div style="padding:10px 18px;display:flex;gap:14px;">
-            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
-              <span style="color:#25D366;font-size:13px;">●</span> WhatsApp
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
-              <span style="color:var(--accent2);font-size:13px;">●</span> Camera
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);">
-              <span style="color:var(--amber);font-size:13px;">●</span> Files / PDF
-            </div>
-            <div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);">JPG · PNG · PDF</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  <!-- =================== RECEIPT UPLOAD SCREEN =================== -->
+        </div> <!-- Close onboarding container -->
+      </div> <!-- Close onboarding overlay -->
+    </div> <!-- Close screen-home -->  <!-- =================== RECEIPT UPLOAD SCREEN =================== -->
   <div class="screen" id="screen-receipt">
     <div class="topbar">
       <div class="topbar-action" onclick="receiptBack()" style="cursor:pointer;">
